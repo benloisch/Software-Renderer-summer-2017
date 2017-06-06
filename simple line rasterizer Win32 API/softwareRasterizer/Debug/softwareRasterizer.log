@@ -1,22 +1,15 @@
-﻿Build started 8/27/2015 6:06:22 PM.
-     1>Project "C:\Users\Ben Loisch\documents\visual studio 2013\Projects\softwareRasterizer\softwareRasterizer\softwareRasterizer.vcxproj" on node 2 (Build target(s)).
+﻿Build started 6/6/2017 6:48:57 PM.
+     1>Project "C:\Users\Ben Loisch\Downloads\software-rasterizer-1-master\simple line rasterizer Win32 API\softwareRasterizer\softwareRasterizer.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\mathclasses\mathclasses\matrix.cpp Object.cpp Renderer.cpp Source.cpp
-         Skipping... (no relevant changes detected)
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\mathclasses\mathclasses\matrix.cpp ..\..\mathclasses\mathclasses\vector.cpp Source.cpp
          Source.cpp
-         Renderer.cpp
-         Object.cpp
+         vector.cpp
+     1>c1xx : fatal error C1083: Cannot open source file: '..\..\mathclasses\mathclasses\vector.cpp': No such file or directory
          matrix.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Ben Loisch\documents\visual studio 2013\Projects\softwareRasterizer\Debug\softwareRasterizer.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Ben Loisch\documents\visual studio 2013\Projects\softwareRasterizer\Debug\softwareRasterizer.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Ben Loisch\documents\visual studio 2013\Projects\softwareRasterizer\Debug\softwareRasterizer.lib" /MACHINE:X86 Debug\matrix.obj
-         Debug\vector.obj
-         Debug\High_Performance_Counter.obj
-         Debug\Object.obj
-         Debug\Renderer.obj
-         Debug\Source.obj
-         softwareRasterizer.vcxproj -> C:\Users\Ben Loisch\documents\visual studio 2013\Projects\softwareRasterizer\Debug\softwareRasterizer.exe
-     1>Done Building Project "C:\Users\Ben Loisch\documents\visual studio 2013\Projects\softwareRasterizer\softwareRasterizer\softwareRasterizer.vcxproj" (Build target(s)).
+     1>c1xx : fatal error C1083: Cannot open source file: '..\..\mathclasses\mathclasses\matrix.cpp': No such file or directory
+         Generating Code...
+     1>Done Building Project "C:\Users\Ben Loisch\Downloads\software-rasterizer-1-master\simple line rasterizer Win32 API\softwareRasterizer\softwareRasterizer.vcxproj" (Build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:03.51
+Time Elapsed 00:00:03.19
