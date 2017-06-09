@@ -1,7 +1,6 @@
 #include <Windows.h>
 #include <sstream>
 
-<<<<<<< HEAD
 #include <thread>
 
 using namespace std;
@@ -9,10 +8,6 @@ using namespace std;
 #include "High_Performance_Counter.h"
 #include "Win32WindowBuffer.h"
 //#include "BufferInterface.h"
-=======
-#include "High_Performance_Counter.h"
-#include "Win32WindowBuffer.h"
->>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 
 void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 {
@@ -34,7 +29,6 @@ void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 	}
 }
 
-<<<<<<< HEAD
 void testFunc(Win32WindowBuffer *win32buf) {
 	win32buf->FillBufferColor(255, 0, 255);
 }
@@ -42,11 +36,6 @@ void testFunc(Win32WindowBuffer *win32buf) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
 	Win32WindowBuffer win32WindowBuffer(1920, 1080);
-=======
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
-{
-	Win32WindowBuffer win32WindowBuffer(800, 600);
->>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -62,7 +51,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-<<<<<<< HEAD
 
 		/*
 		thread funcTest(&Win32WindowBuffer::FillBufferColor, &win32WindowBuffer, 0, 0, 0);
@@ -114,15 +102,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		hpc.Tick();
 		displayFPS(hpc, *win32WindowBuffer.getWindowHandle());
 		
-=======
-		else {
-			
-			win32WindowBuffer.drawBuffer();
-
-			hpc.Tick();
-			displayFPS(hpc, win32WindowBuffer.getWindowHandle());
-		}
->>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 	}
 
 	return (int)msg.wParam;
