@@ -1,7 +1,10 @@
 #include "Win32WindowBuffer.h"
 
+<<<<<<< HEAD
 mutex mut;
 
+=======
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 LRESULT CALLBACK WndProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -19,7 +22,11 @@ LRESULT CALLBACK WndProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lPar
 	return DefWindowProc(windowHandle, msg, wParam, lParam);
 }
 
+<<<<<<< HEAD
 bool initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer *win32buf)
+=======
+bool initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer win32buf)
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 {
 	WNDCLASS wc;
 	wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -38,6 +45,7 @@ bool initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer *
 		MessageBox(0, L"Failed to register window class", 0, 0);
 	}
 
+<<<<<<< HEAD
 	HWND *handle = new HWND;
 	*handle = NULL;
 		
@@ -57,40 +65,73 @@ bool initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer *
 	win32buf->setWindowHandle(handle);
 
 	if (win32buf->getWindowHandle() == 0)
+=======
+	win32buf.setWindowHandle(CreateWindow(
+		L"MainWindowClass",
+		L"Software Rasterizer",
+		WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		win32buf.GetWidth(),
+		win32buf.GetHeight(),
+		0,
+		0,
+		instanceHandle,
+		0));
+
+	if (win32buf.getWindowHandle() == 0)
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 	{
 		MessageBox(0, L"CreateWindow() failed", 0, 0);
 		return false;
 	}
 
+<<<<<<< HEAD
 	ShowWindow(*win32buf->getWindowHandle(), show);
 	UpdateWindow(*win32buf->getWindowHandle());
+=======
+	ShowWindow(win32buf.getWindowHandle(), show);
+	UpdateWindow(win32buf.getWindowHandle());
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 
 	return true;
 }
 
 Win32WindowBuffer::Win32WindowBuffer(int width, int height) {
 	windowHandle = 0;
+<<<<<<< HEAD
 
 	this->width = width;
 	this->height = height;
 
 	clientHeight = 0;
 	clientWidth = 0;
+=======
+	
+	RECT rect;
+	GetClientRect(windowHandle, &rect);
+	clientWidth = rect.right - rect.left;
+	clientHeight = rect.bottom - rect.top;
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 
 	hdc = NULL;
 	memHdc = NULL;
 	buffer = NULL;
 	bytebuffer = NULL;
 	padding = 0;
+<<<<<<< HEAD
 
 	//startBuffer = 0;
 	//endBuffer = 0;
 	//this->threads = threads;
 	//threadIndex = 0;
+=======
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 }
 
 bool Win32WindowBuffer::initializeWindow(HINSTANCE instanceHandle, int show) {
 
+<<<<<<< HEAD
 	if(!(initializeWindowApp(instanceHandle, show, this)))
 		return 0;
 
@@ -99,6 +140,11 @@ bool Win32WindowBuffer::initializeWindow(HINSTANCE instanceHandle, int show) {
 	clientWidth = rect.right - rect.left;
 	clientHeight = rect.bottom - rect.top;
 
+=======
+	if(!(initializeWindowApp(instanceHandle, show, *this)))
+		return 0;
+
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 	hdc = GetDC(windowHandle);
 
 	padding = 0;
@@ -127,12 +173,16 @@ bool Win32WindowBuffer::initializeWindow(HINSTANCE instanceHandle, int show) {
 	if (buffer == NULL)
 	{
 		MessageBox(0, L"HBITMAP buffer is null", 0, 0);
+<<<<<<< HEAD
 		return 0;
+=======
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
 	}
 
 	return 1;
 }
 
+<<<<<<< HEAD
 HWND* Win32WindowBuffer::getWindowHandle() {
 	return &windowHandle;
 }
@@ -201,3 +251,12 @@ void Win32WindowBuffer::FillBufferColor(float r, float g, float b) {
 	mut.unlock();
 }
 */
+=======
+HWND Win32WindowBuffer::getWindowHandle() {
+	return windowHandle;
+}
+
+void Win32WindowBuffer::setWindowHandle(HWND handle) {
+	this->windowHandle = handle;
+}
+>>>>>>> 02b1ec391f0386c09dee4158af7074c40fa1e51b
