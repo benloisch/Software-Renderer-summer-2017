@@ -29,13 +29,13 @@ void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 	}
 }
 
-void testFunc(Win32WindowBuffer *win32buf) {
-	win32buf->FillBufferColor(255, 0, 255);
-}
+//void testFunc(Win32WindowBuffer *win32buf) {
+//	win32buf->FillBufferColor(255, 0, 255);
+//}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1920, 1080);
+	Win32WindowBuffer win32WindowBuffer(800, 600);
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -95,7 +95,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		*/
 
 		win32WindowBuffer.FillBufferColor(0, 0, 0);
-		win32WindowBuffer.FillBufferColor(255, 255, 255);
+		win32WindowBuffer.FillBufferColor(255, 0, 255);
 
 		win32WindowBuffer.drawBuffer();
 
