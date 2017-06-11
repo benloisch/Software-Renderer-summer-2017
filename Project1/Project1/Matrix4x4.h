@@ -19,6 +19,9 @@ public:
 	Matrix4x4& operator=(const Matrix4x4 &matrix);
 	Matrix4x4 operator*(const Matrix4x4 &matrix);//matrix multiplication 
 
+	//add in det3x3 definition and old matrix methods
+
+	double det3x3(double, double, double, double, double, double, double, double, double);
 
 	void translate(double x, double y, double z);
 };
