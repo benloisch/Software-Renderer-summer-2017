@@ -40,7 +40,7 @@ void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1920, 1080);
+	Win32WindowBuffer win32WindowBuffer(1366, 768);
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -64,17 +64,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	//define projection matrix
 	cam.setNearPlane(0.1);
-	cam.setFarPlane(100);
+	cam.setFarPlane(1000);
 	cam.setAspectRatio(win32WindowBuffer.clientWidth, win32WindowBuffer.clientHeight);
 	cam.setFieldOfView(70);
 	cam.calculateProjectionMatrix();
 
-	//StarField3D
+	//***********************************************************StarField3D
+	
 	Vertex stars[10000];
 	for (int i = 0; i < 10000; i++)
 		stars[i] = Vertex((rand() % 200) - 100, (rand() % 200) - 100, (rand() % 100) + 1, 1);
-
-
+	
 
 	while (msg.message != WM_QUIT)
 	{
@@ -85,7 +85,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		}
 
 
-
+		//********************************************************multithreading draw buffer attempt
 		/*
 		thread funcTest(&Win32WindowBuffer::FillBufferColor, &win32WindowBuffer, 0, 0, 0);
 		funcTest.join();
@@ -131,13 +131,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		win32WindowBuffer.FillBufferColor(255, 255, 255);
 		win32WindowBuffer.FillBufferColor(0, 0, 0);
 
-		//********************************************************StarField
+		//********************************************************StarField3D
+		
 		//update stars
-		float delta = hpc.mtimePerFrame;
+		double delta = hpc.mtimePerFrame;
 		
 		for (int i = 0; i < 10000; i++) {
 			stars[i].v.z -= delta * 10;
 		}
+
+		static double rot;
+		rot += delta * 100;
+
+		//Matrix4x4 modelRotate;
+		//modelRotate.setYrot(rot);
+		//modelRotate.setRotArb(-1, 0, 0, rot);
+		//Matrix4x4 modelTranslate;
+		//modelTranslate.setTranslate(0, -200, 300);
+		Matrix4x4 model;// = modelRotate * modelTranslate;
 
 		//reset any stars that go out of screen (into negative z)
 		for (int i = 0; i < 10000; i++) {
@@ -146,18 +157,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 			}
 		}
 
-		Matrix4x4 viewProjection = cam.projectionMatrix;// cam.viewMatrix/*.inverse()*/ * cam.projectionMatrix;
+		Matrix4x4 viewProjection = model * cam.viewMatrix.inverse() * cam.projectionMatrix;
 
 		//project verticies, divide by z (w), transform from NDC to screen space, finally draw 
 		for (int i = 0; i < 10000; i++) {
 			Vertex v = (stars[i].v * viewProjection);
 			v.v /= v.v.w;
 
-			if (v.v.x <= -1.0 || v.v.x >= 1.0 || v.v.y <= -1.0 || v.v.y >= 1.0)
+			if (v.v.x <= -1.0 || v.v.x >= 1.0 || v.v.y <= -1.0 || v.v.y >= 1.0 || v.v.z <= 0 || v.v.z >= 1)
 				continue;
 
-			int screenX = (v.v.x + 1) * 0.5 * win32WindowBuffer.clientWidth;
-			int screenY = (v.v.y + 1) * 0.5 * win32WindowBuffer.clientHeight;
+			int screenX = (int)((v.v.x + 1) * 0.5 * win32WindowBuffer.clientWidth);
+			int screenY = (int)((v.v.y + 1) * 0.5 * win32WindowBuffer.clientHeight);
 
 			char *pixelComponent = win32WindowBuffer.bytebuffer + ((screenY * win32WindowBuffer.clientWidth + screenX) * 4);
 			*(pixelComponent) = (unsigned char)255;
@@ -165,6 +176,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 			*(pixelComponent + 2) = (unsigned char)255;
 			*(pixelComponent + 3) = (unsigned char)0;
 		}
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		win32WindowBuffer.drawBuffer();
 

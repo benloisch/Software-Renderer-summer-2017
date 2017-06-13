@@ -43,13 +43,11 @@ inline void Camera::calculateViewMatrix() {
 	//Cz = AxBy - AyBx
 
 	//calculate x basis vector by taking cross product of world 'up' (0, 1, 0) vector and lookDirection vector
-	Vector4D xBasis(lookDirection.z, 0.0, lookDirection.x, 0.0);
+	Vector4D up(0.0, 1.0, 0.0, 0.0);
+	Vector4D xBasis = up ^ lookDirection;
 
 	//calculate y basis vector by taking cross product of lookDirection and x basis vector
-	Vector4D yBasis(((lookDirection.y * xBasis.z) - (lookDirection.z * xBasis.y)),
-		((lookDirection.z * xBasis.x) - (lookDirection.x * xBasis.z)),
-		((lookDirection.x * xBasis.y) - (lookDirection.y * xBasis.x)),
-		0.0);
+	Vector4D yBasis = lookDirection ^ xBasis;
 
 	//the lookDirection is already the z basis vector
 	Vector4D zBasis = lookDirection;
@@ -61,7 +59,7 @@ inline void Camera::calculateViewMatrix() {
 	viewMatrix.setRow1(xBasis.x, xBasis.y, xBasis.z, 0.0);
 	viewMatrix.setRow2(yBasis.x, yBasis.y, yBasis.z, 0.0);
 	viewMatrix.setRow3(zBasis.x, zBasis.y, zBasis.z, 0.0);
-	viewMatrix.setRow4(originPosition.x, originPosition.y, originPosition.z, 0.0);
+	viewMatrix.setRow4(originPosition.x, originPosition.y, originPosition.z, 1.0);
 
 
 }
@@ -85,11 +83,14 @@ inline void Camera::calculateProjectionMatrix() {
 	w = z
 	*/
 
-	projectionMatrix.m[0][0] = 1.0 / tan(fieldOfView / 2.0);
-	projectionMatrix.m[1][1] = 1.0;
+	if (aspectRatio < 1.0)
+		projectionMatrix.m[0][0] = 1.0 / aspectRatio * tan(fieldOfView / 2.0);
+	else
+		projectionMatrix.m[0][0] = aspectRatio / tan(fieldOfView / 2.0);
+	projectionMatrix.m[1][1] = 1.0 / tan(fieldOfView / 2.0);
 	projectionMatrix.m[2][2] = farPlane / (farPlane - nearPlane);
 	projectionMatrix.m[2][3] = 1.0;
-	projectionMatrix.m[3][2] = projectionMatrix.m[2][2] * nearPlane * (-1);
+	projectionMatrix.m[3][2] = -nearPlane * farPlane / (farPlane - nearPlane);
 	projectionMatrix.m[3][3] = 0.0;
 }
 

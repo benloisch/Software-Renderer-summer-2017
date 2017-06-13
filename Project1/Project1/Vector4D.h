@@ -173,7 +173,7 @@ Vector4D Vector4D::operator^(const Vector4D &vector)
 	Vector4D result;
 	result.x = (this->y * vector.z) - (this->z * vector.y);
 	result.y = (this->z * vector.x) - (this->x * vector.z);
-	result.z = (this->x * vector.y) - (this->y * vector.z);
+	result.z = (this->x * vector.y) - (this->y * vector.x);
 
 	return result;
 }
@@ -199,10 +199,10 @@ Vector4D Vector4D::operator*(const Matrix4x4 &matrix)
 {
 	Vector4D result;
 
-	result.x = (this->x * matrix.m[0][0]) + (this->y * matrix.m[1][0]) + (this->z * matrix.m[2][0]) + this->w * matrix.m[3][0];
-	result.y = (this->x * matrix.m[0][1]) + (this->y * matrix.m[1][1]) + (this->z * matrix.m[2][1]) + this->w * matrix.m[3][1];
-	result.z = (this->x * matrix.m[0][2]) + (this->y * matrix.m[1][2]) + (this->z * matrix.m[2][2]) + this->w * matrix.m[3][2];
-	result.w = (this->x * matrix.m[0][3]) + (this->y * matrix.m[1][3]) + (this->z * matrix.m[2][3]) + this->w * matrix.m[3][3];
+	result.x = (this->x * matrix.m[0][0]) + (this->y * matrix.m[1][0]) + (this->z * matrix.m[2][0]) + (this->w * matrix.m[3][0]);
+	result.y = (this->x * matrix.m[0][1]) + (this->y * matrix.m[1][1]) + (this->z * matrix.m[2][1]) + (this->w * matrix.m[3][1]);
+	result.z = (this->x * matrix.m[0][2]) + (this->y * matrix.m[1][2]) + (this->z * matrix.m[2][2]) + (this->w * matrix.m[3][2]);
+	result.w = (this->x * matrix.m[0][3]) + (this->y * matrix.m[1][3]) + (this->z * matrix.m[2][3]) + (this->w * matrix.m[3][3]);
 
 	return result;
 }
