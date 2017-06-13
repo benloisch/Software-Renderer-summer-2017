@@ -2,7 +2,7 @@
 #define WIN32WINDOWBUFFER_H_
 
 #include <Windows.h>
-#include <mutex>
+//#include <mutex>
 #include "BufferInterface.h"
 
 using namespace std;

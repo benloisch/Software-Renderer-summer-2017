@@ -1,6 +1,6 @@
 #include "Win32WindowBuffer.h"
 
-mutex mut;
+//mutex mut;
 
 LRESULT CALLBACK WndProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
