@@ -5,12 +5,11 @@ Camera::Camera() {
 	lookDirection = Vector4D(0.0, 0.0, 0.0, 0.0);
 
 	nearPlane = farPlane = aspectRatio = fieldOfView = 0.0;
-
-	viewMatrix.setRow4(originPosition.x, originPosition.y, originPosition.z, 1.0);
 }
 
 void Camera::setOriginPosition(double ox, double oy, double oz) {
 	originPosition = Vector4D(ox, oy, oz, 0.0);
+	viewMatrix.setRow4(originPosition.x, originPosition.y, originPosition.z, 1.0);
 }
 
 void Camera::setLookDirection(double lx, double ly, double lz) {

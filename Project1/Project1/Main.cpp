@@ -72,26 +72,31 @@ void checkRotation(float &xs, float &xz, Vector4D &vlook, Matrix4x4 cam)
 		diffy += mouseNow.x - sMouse.x;
 		rot.setYrot(diffy / 2);
 		vlook = vlook * rot;
+		vlook.normalize();
 	}
 	else if (mouseNow.x - sMouse.x < 0)
 	{
 		diffy += mouseNow.x - sMouse.x;
 		rot.setYrot(diffy / 2);
 		vlook = vlook * rot;
+		vlook.normalize();
 	}
-
+	
 	if (mouseNow.y - sMouse.y > 0)
 	{
 		diffx -= mouseNow.y - sMouse.y;
 		rot.setRotArb(cam.m[0][0], cam.m[0][1], cam.m[0][2], diffx / 2);
 		vlook = vlook * rot;
+		vlook.normalize();
 	}
 	else if (mouseNow.y - sMouse.y < 0)
 	{
 		diffx -= mouseNow.y - sMouse.y;
 		rot.setRotArb(cam.m[0][0], cam.m[0][1], cam.m[0][2], diffx / 2);
 		vlook = vlook * rot;
+		vlook.normalize();
 	}
+	
 	sMouse = mouseNow;
 
 }
@@ -109,7 +114,7 @@ int main() {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1920, 1080);
+	Win32WindowBuffer win32WindowBuffer(800, 600);
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -129,7 +134,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	Camera cam;
 	cam.setOriginPosition(0, 0, -10);
 	cam.setLookDirection(0, 0, 1);
-	cam.calculateViewMatrix();
+	cam.calculateViewMatrix(0, 0);
 
 	//define projection matrix
 	cam.setNearPlane(0.1);
@@ -260,9 +265,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		float xz = 0;
 		checkRotation(xs, xz, cam.lookDirection, cam.viewMatrix);
 
-		cam.updateCameraOrientation(xs, xz);
+		cam.calculateViewMatrix(xs, xz);
 		SetCursorPos(win32WindowBuffer.clientWidth / 2, win32WindowBuffer.clientHeight / 2);
-		//cout << cam.lookDirection.x << ", " << cam.lookDirection.y << ", " << cam.lookDirection.z << endl;
+		cout << cam.viewMatrix.m[0][0] << ", " << cam.viewMatrix.m[0][1] << ", " << cam.viewMatrix.m[0][2] << endl;
 
 
 
