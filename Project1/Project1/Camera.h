@@ -30,6 +30,7 @@ public:
 
 	void calculateViewMatrix();
 	void calculateProjectionMatrix();
+	void updateCameraOrientation(double, double);
 
 private:
 
@@ -60,8 +61,6 @@ inline void Camera::calculateViewMatrix() {
 	viewMatrix.setRow2(yBasis.x, yBasis.y, yBasis.z, 0.0);
 	viewMatrix.setRow3(zBasis.x, zBasis.y, zBasis.z, 0.0);
 	viewMatrix.setRow4(originPosition.x, originPosition.y, originPosition.z, 1.0);
-
-
 }
 
 inline void Camera::calculateProjectionMatrix() {
@@ -92,6 +91,37 @@ inline void Camera::calculateProjectionMatrix() {
 	projectionMatrix.m[2][3] = 1.0;
 	projectionMatrix.m[3][2] = -nearPlane * farPlane / (farPlane - nearPlane);
 	projectionMatrix.m[3][3] = 0.0;
+}
+
+inline void Camera::updateCameraOrientation(double xs, double zs) {
+	//Cross Product
+	//Cx = AyBz - AzBy
+	//Cy = AzBx - AxBz
+	//Cz = AxBy - AyBx
+
+	//calculate x basis vector by taking cross product of world 'up' (0, 1, 0) vector and lookDirection vector
+	Vector4D up(0.0, 1.0, 0.0, 0.0);
+	Vector4D xBasis = up ^ lookDirection;
+
+	//calculate y basis vector by taking cross product of lookDirection and x basis vector
+	Vector4D yBasis = lookDirection ^ xBasis;
+
+	//the lookDirection is already the z basis vector
+	Vector4D zBasis = lookDirection;
+
+	xBasis.normalize();
+	yBasis.normalize();
+	zBasis.normalize();
+
+	viewMatrix.setRow1(xBasis.x, xBasis.y, xBasis.z, 0.0);
+	viewMatrix.setRow2(yBasis.x, yBasis.y, yBasis.z, 0.0);
+	viewMatrix.setRow3(zBasis.x, zBasis.y, zBasis.z, 0.0);
+	//viewMatrix.setRow4(originPosition.x, originPosition.y, originPosition.z, 1.0);
+
+	Vector4D trans;
+	trans = trans + (xBasis * xs);
+	trans = trans + (zBasis * zs);
+	viewMatrix.setTranslate(viewMatrix.m[3][0] + trans.x, viewMatrix.m[3][1] + trans.y, viewMatrix.m[3][2] + trans.z);
 }
 
 #endif

@@ -32,7 +32,9 @@ public:
 
 	void FillBufferColor(float r, float g, float b);
 
-	bool initializeWindow(HINSTANCE instanceHandle, int show);
+	bool Win32WindowBuffer::initializeWindow(HINSTANCE instanceHandle, int show);
+	bool Win32WindowBuffer::initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer *win32buf);
+	static LRESULT CALLBACK Win32WindowBuffer::WndProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	inline void drawBuffer() {
 		BitBlt(hdc, 0, 0, clientWidth, clientHeight, memHdc, 0, 0, SRCCOPY);

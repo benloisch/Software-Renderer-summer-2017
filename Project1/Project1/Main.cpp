@@ -1,6 +1,8 @@
 #include <Windows.h>
 #include <sstream>
 #include <math.h>
+#include <iostream>
+#include <vector>
 
 //#include <thread>
 
@@ -34,13 +36,80 @@ void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 	}
 }
 
-//void testFunc(Win32WindowBuffer *win32buf) {
-//	win32buf->FillBufferColor(255, 0, 255);
-//}
+POINT sMouse;
+float diffx = 0;
+float diffy = 0;
+
+void checkRotation(float &xs, float &xz, Vector4D &vlook, Matrix4x4 cam)
+{
+	Matrix4x4 rot;
+
+	float movementspeed = float(0.1);
+	if (GetAsyncKeyState(0x57))
+	{
+		xz += movementspeed;
+	}
+	else if (GetAsyncKeyState(0x53))
+	{
+		xz -= movementspeed;
+	}
+
+	if (GetAsyncKeyState(0x41))
+	{
+		xs -= movementspeed;
+	}
+	else if (GetAsyncKeyState(0x44))
+	{
+		xs += movementspeed;
+	}
+
+	sMouse;
+	POINT mouseNow;
+	GetCursorPos(&mouseNow);
+
+	if (mouseNow.x - sMouse.x > 0)
+	{
+		diffy += mouseNow.x - sMouse.x;
+		rot.setYrot(diffy / 2);
+		vlook = vlook * rot;
+	}
+	else if (mouseNow.x - sMouse.x < 0)
+	{
+		diffy += mouseNow.x - sMouse.x;
+		rot.setYrot(diffy / 2);
+		vlook = vlook * rot;
+	}
+
+	if (mouseNow.y - sMouse.y > 0)
+	{
+		diffx -= mouseNow.y - sMouse.y;
+		rot.setRotArb(cam.m[0][0], cam.m[0][1], cam.m[0][2], diffx / 2);
+		vlook = vlook * rot;
+	}
+	else if (mouseNow.y - sMouse.y < 0)
+	{
+		diffx -= mouseNow.y - sMouse.y;
+		rot.setRotArb(cam.m[0][0], cam.m[0][1], cam.m[0][2], diffx / 2);
+		vlook = vlook * rot;
+	}
+	sMouse = mouseNow;
+
+}
+
+
+//********************************************************multithreading attempt
+/*void testFunc(Win32WindowBuffer *win32buf) {
+	win32buf->FillBufferColor(255, 0, 255);
+}*/
+
+//call main so we can create a console for output
+int main() {
+	return WinMain(GetModuleHandle(NULL), NULL, NULL, SW_SHOW);
+}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1366, 768);
+	Win32WindowBuffer win32WindowBuffer(1920, 1080);
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -58,7 +127,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(0, 0, 0);
+	cam.setOriginPosition(0, 0, -10);
 	cam.setLookDirection(0, 0, 1);
 	cam.calculateViewMatrix();
 
@@ -69,11 +138,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	cam.setFieldOfView(70);
 	cam.calculateProjectionMatrix();
 
+	//*******************************************Setup input
+	sMouse;
+	SetCursorPos(win32WindowBuffer.clientWidth / 2, win32WindowBuffer.clientHeight / 2);
+	GetCursorPos(&sMouse);
+
 	//***********************************************************StarField3D
 	
-	Vertex stars[10000];
+	//Vertex stars[100000];
+	vector<Vertex> stars(10000);
 	for (int i = 0; i < 10000; i++)
-		stars[i] = Vertex((rand() % 200) - 100, (rand() % 200) - 100, (rand() % 100) + 1, 1);
+		stars[i] = Vertex(static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, 0, 1);
 	
 
 	while (msg.message != WM_QUIT)
@@ -83,7 +158,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
 
 		//********************************************************multithreading draw buffer attempt
 		/*
@@ -136,9 +210,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		//update stars
 		double delta = hpc.mtimePerFrame;
 		
+		//for (int i = 0; i < 10000; i++) {
+		//	stars[i].v.z -= delta * 10;
+		//}
+
+		//reset any stars that go out of screen (into negative z)
 		for (int i = 0; i < 10000; i++) {
-			stars[i].v.z -= delta * 10;
+			if (stars[i].v.z <= 0) {
+				//stars[i] = Vertex(rand() % 10 - 5, rand() % 10 - 5, 0, 1);
+			}
 		}
+		
+		//*********************************************************Get Mouse Input and move Camera accordingly
 
 		static double rot;
 		rot += delta * 100;
@@ -149,13 +232,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		//Matrix4x4 modelTranslate;
 		//modelTranslate.setTranslate(0, -200, 300);
 		Matrix4x4 model;// = modelRotate * modelTranslate;
-
-		//reset any stars that go out of screen (into negative z)
-		for (int i = 0; i < 10000; i++) {
-			if (stars[i].v.z <= 0) {
-				stars[i] = Vertex((rand() % 200) - 100, (rand() % 200) - 100, (rand() % 100) + 1, 1);
-			}
-		}
 
 		Matrix4x4 viewProjection = model * cam.viewMatrix.inverse() * cam.projectionMatrix;
 
@@ -180,11 +256,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 
 
+		float xs = 0;
+		float xz = 0;
+		checkRotation(xs, xz, cam.lookDirection, cam.viewMatrix);
 
-
-
-
-
+		cam.updateCameraOrientation(xs, xz);
+		SetCursorPos(win32WindowBuffer.clientWidth / 2, win32WindowBuffer.clientHeight / 2);
+		//cout << cam.lookDirection.x << ", " << cam.lookDirection.y << ", " << cam.lookDirection.z << endl;
 
 
 

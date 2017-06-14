@@ -2,8 +2,9 @@
 
 //mutex mut;
 
-LRESULT CALLBACK WndProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Win32WindowBuffer::WndProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+
 	switch (msg)
 	{
 	case WM_KEYDOWN:
@@ -19,7 +20,7 @@ LRESULT CALLBACK WndProc(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lPar
 	return DefWindowProc(windowHandle, msg, wParam, lParam);
 }
 
-bool initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer *win32buf)
+bool Win32WindowBuffer::initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer *win32buf)
 {
 	WNDCLASS wc;
 	wc.style = CS_HREDRAW | CS_VREDRAW;
