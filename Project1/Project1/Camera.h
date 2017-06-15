@@ -2,6 +2,7 @@
 #define CAMERA_H_
 
 #include <math.h>
+#include <Windows.h>
 
 #include "Matrix4x4.h"
 #include "Vector4D.h"
@@ -19,6 +20,12 @@ public:
 	double aspectRatio;
 	double fieldOfView;
 
+	double width;
+	double height;
+
+	POINT sMouse;
+	double movX, movZ;
+
 	Camera();
 
 	void setOriginPosition(double, double, double);
@@ -28,16 +35,18 @@ public:
 	void setAspectRatio(double, double);
 	void setFieldOfView(double);
 
-	void calculateViewMatrix(double, double);
+	void calculateViewMatrix();
 	void calculateProjectionMatrix();
 	void updateCameraOrientation(double, double);
+
+	void getInput(double &delta);
 
 private:
 
 
 };
 
-inline void Camera::calculateViewMatrix(double movX, double movZ) {	
+inline void Camera::calculateViewMatrix() {	
 	//Cross Product
 	//Cx = AyBz - AzBy
 	//Cy = AzBx - AxBz
@@ -62,9 +71,13 @@ inline void Camera::calculateViewMatrix(double movX, double movZ) {
 	viewMatrix.setRow3(zBasis.x, zBasis.y, zBasis.z, 0.0);
 
 	Vector4D trans;
-	trans = trans + (xBasis * movX);
-	trans = trans + (zBasis * movZ);
-	viewMatrix.setTranslate(viewMatrix.m[3][0] + trans.x, viewMatrix.m[3][1] + trans.y, viewMatrix.m[3][2] + trans.z);
+	trans += (xBasis * movX);
+	trans += (zBasis * movZ);
+	movX = movZ = 0.0;
+
+	viewMatrix.m[3][0] += trans.x;
+	viewMatrix.m[3][1] += trans.y; 
+	viewMatrix.m[3][2] += trans.z;
 }
 
 inline void Camera::calculateProjectionMatrix() {
@@ -86,15 +99,80 @@ inline void Camera::calculateProjectionMatrix() {
 	w = z
 	*/
 
+	double oneOverAspect = 1.0 / aspectRatio;
 	if (aspectRatio < 1.0)
 		projectionMatrix.m[0][0] = 1.0 / aspectRatio * tan(fieldOfView / 2.0);
 	else
-		projectionMatrix.m[0][0] = aspectRatio / tan(fieldOfView / 2.0);
+	projectionMatrix.m[0][0] = 1.0 / oneOverAspect * tan(fieldOfView / 2.0);
 	projectionMatrix.m[1][1] = 1.0 / tan(fieldOfView / 2.0);
 	projectionMatrix.m[2][2] = farPlane / (farPlane - nearPlane);
 	projectionMatrix.m[2][3] = 1.0;
 	projectionMatrix.m[3][2] = -nearPlane * farPlane / (farPlane - nearPlane);
 	projectionMatrix.m[3][3] = 0.0;
+}
+
+inline void Camera::getInput(double &delta)
+{
+	Matrix4x4 rot;
+	sMouse;
+	POINT mouseNow;
+	GetCursorPos(&mouseNow);
+	float movementspeed = float(0.1);
+
+	if (GetAsyncKeyState(0x57)) //W
+	{
+		movZ = 10.1 * delta;
+	}
+	else if (GetAsyncKeyState(0x53)) //S
+	{
+		movZ = -10.1 * delta;
+	}
+
+	if (GetAsyncKeyState(0x41)) //A
+	{
+		movX = -10.1 * delta;
+	}
+	else if (GetAsyncKeyState(0x44)) //D
+	{
+		movX = 10.1 * delta;
+	}
+
+	if (mouseNow.x - sMouse.x > 0)
+	{
+		double diff = mouseNow.x - sMouse.x;
+		diff *= 10.1 * delta;
+		rot.setYrot(diff);
+		lookDirection *= rot;
+		lookDirection.normalize();
+	}
+	else if (mouseNow.x - sMouse.x < 0)
+	{
+		double diff = mouseNow.x - sMouse.x;
+		diff *= 10.1 * delta;
+		rot.setYrot(diff);
+		lookDirection *= rot;
+		lookDirection.normalize();
+	}
+
+	if (mouseNow.y - sMouse.y > 0)
+	{
+		double diff = mouseNow.y - sMouse.y;
+		diff *= 10.1 * delta;
+		rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
+		lookDirection *= rot;
+		lookDirection.normalize();
+	}
+	else if (mouseNow.y - sMouse.y < 0)
+	{
+		double diff = mouseNow.y - sMouse.y;
+		diff *= 10.1 * delta;
+		rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
+		lookDirection *= rot;
+		lookDirection.normalize();
+	}
+	sMouse = mouseNow;
+	SetCursorPos((int)(width / 2), (int)(height / 2));
+	GetCursorPos(&sMouse);
 }
 
 #endif

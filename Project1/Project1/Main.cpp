@@ -15,6 +15,8 @@ using namespace std;
 #include "Vector4D.h"
 #include "Vertex.h"
 #include "Camera.h"
+#include "Mesh.h"
+#include "Pipeline.h"
 
 void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 {
@@ -36,72 +38,6 @@ void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 	}
 }
 
-POINT sMouse;
-float diffx = 0;
-float diffy = 0;
-
-void checkRotation(float &xs, float &xz, Vector4D &vlook, Matrix4x4 cam)
-{
-	Matrix4x4 rot;
-
-	float movementspeed = float(0.1);
-	if (GetAsyncKeyState(0x57))
-	{
-		xz += movementspeed;
-	}
-	else if (GetAsyncKeyState(0x53))
-	{
-		xz -= movementspeed;
-	}
-
-	if (GetAsyncKeyState(0x41))
-	{
-		xs -= movementspeed;
-	}
-	else if (GetAsyncKeyState(0x44))
-	{
-		xs += movementspeed;
-	}
-
-	sMouse;
-	POINT mouseNow;
-	GetCursorPos(&mouseNow);
-
-	if (mouseNow.x - sMouse.x > 0)
-	{
-		diffy += mouseNow.x - sMouse.x;
-		rot.setYrot(diffy / 2);
-		vlook = vlook * rot;
-		vlook.normalize();
-	}
-	else if (mouseNow.x - sMouse.x < 0)
-	{
-		diffy += mouseNow.x - sMouse.x;
-		rot.setYrot(diffy / 2);
-		vlook = vlook * rot;
-		vlook.normalize();
-	}
-	
-	if (mouseNow.y - sMouse.y > 0)
-	{
-		diffx -= mouseNow.y - sMouse.y;
-		rot.setRotArb(cam.m[0][0], cam.m[0][1], cam.m[0][2], diffx / 2);
-		vlook = vlook * rot;
-		vlook.normalize();
-	}
-	else if (mouseNow.y - sMouse.y < 0)
-	{
-		diffx -= mouseNow.y - sMouse.y;
-		rot.setRotArb(cam.m[0][0], cam.m[0][1], cam.m[0][2], diffx / 2);
-		vlook = vlook * rot;
-		vlook.normalize();
-	}
-	
-	sMouse = mouseNow;
-
-}
-
-
 //********************************************************multithreading attempt
 /*void testFunc(Win32WindowBuffer *win32buf) {
 	win32buf->FillBufferColor(255, 0, 255);
@@ -114,7 +50,7 @@ int main() {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(800, 600);
+	Win32WindowBuffer win32WindowBuffer(1920, 1080);
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -123,8 +59,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	HighPerformanceCounter hpc;
 	hpc.Start();
 
-	unsigned char r = 0;
-
 	//*******************************************Setup Level
 	//load models and their textures
 	//apply matrix transforms
@@ -132,29 +66,42 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(0, 0, -10);
+	cam.setOriginPosition(0, 0, 0);
 	cam.setLookDirection(0, 0, 1);
-	cam.calculateViewMatrix(0, 0);
+	cam.calculateViewMatrix();
 
 	//define projection matrix
 	cam.setNearPlane(0.1);
-	cam.setFarPlane(1000);
+	cam.setFarPlane(100);
 	cam.setAspectRatio(win32WindowBuffer.clientWidth, win32WindowBuffer.clientHeight);
-	cam.setFieldOfView(70);
+	cam.setFieldOfView(60);
 	cam.calculateProjectionMatrix();
 
 	//*******************************************Setup input
-	sMouse;
+	//ShowCursor(false);
 	SetCursorPos(win32WindowBuffer.clientWidth / 2, win32WindowBuffer.clientHeight / 2);
-	GetCursorPos(&sMouse);
+	GetCursorPos(&cam.sMouse);
 
-	//***********************************************************StarField3D
-	
+	//*******************************************Setup pipeline
+	Pipeline pipeline;
+	pipeline.setCamera(&cam);
+	pipeline.setScreenBuffer(win32WindowBuffer.bytebuffer);
+
+	Mesh mesh;
+
+	for (int i = 0; i < 10000; i++) {
+		mesh.verticies.push_back(Vertex(-1.0, 0.0, 2.0, 1.0)); //bottom left point of triangle
+		mesh.verticies.push_back(Vertex(0.0, 1.0, 2.0, 1.0)); //upper center point of triangle
+		mesh.verticies.push_back(Vertex(1.0, 0.0, 2.0, 1.0)); //lower right point of triangle
+	}
+
+	//***********************************************************Old StarField3D code
+	/*
 	//Vertex stars[100000];
 	vector<Vertex> stars(10000);
 	for (int i = 0; i < 10000; i++)
 		stars[i] = Vertex(static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, 0, 1);
-	
+	*/
 
 	while (msg.message != WM_QUIT)
 	{
@@ -207,27 +154,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		//win32WindowBuffer.FillBufferColor(0, 255, 255);
 		*/
 
-		win32WindowBuffer.FillBufferColor(255, 255, 255);
-		win32WindowBuffer.FillBufferColor(0, 0, 0);
-
-		//********************************************************StarField3D
-		
+		//********************************************************Old StarField3D code
+		/*
 		//update stars
-		double delta = hpc.mtimePerFrame;
-		
+		//double delta = hpc.mtimePerFrame;
+
 		//for (int i = 0; i < 10000; i++) {
 		//	stars[i].v.z -= delta * 10;
 		//}
 
 		//reset any stars that go out of screen (into negative z)
-		for (int i = 0; i < 10000; i++) {
-			if (stars[i].v.z <= 0) {
-				//stars[i] = Vertex(rand() % 10 - 5, rand() % 10 - 5, 0, 1);
+		for (int j = 0; j < 1; j++) {
+			for (int i = 0; i < 10000; i++) {
+				if (stars[i].v.z <= 0) {
+					//stars[i] = Vertex(static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, 0, 1);
+				}
 			}
 		}
-		
-		//*********************************************************Get Mouse Input and move Camera accordingly
+		*/
 
+		//***********************************************************Old starfield code
+		/*
 		static double rot;
 		rot += delta * 100;
 
@@ -257,18 +204,34 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 			*(pixelComponent + 2) = (unsigned char)255;
 			*(pixelComponent + 3) = (unsigned char)0;
 		}
-		
+		*/
 
+		//*********************************************************Get delta (time spent rendering a single frame in miliseconds)
+		double delta = hpc.mtimePerFrame;
 
+		win32WindowBuffer.FillBufferColor(255, 255, 255);
+		win32WindowBuffer.FillBufferColor(0, 0, 0);
 
-		float xs = 0;
-		float xz = 0;
-		checkRotation(xs, xz, cam.lookDirection, cam.viewMatrix);
+		//*********************************************************Get Mouse Input and move Camera
+		cam.getInput(delta); //delta used to smooth mouse relative to how fast framerate is
+		cam.calculateViewMatrix(); //after rotating lookDirection vector, recalculate camera matrix
+		pipeline.setCamera(&cam);
 
-		cam.calculateViewMatrix(xs, xz);
-		SetCursorPos(win32WindowBuffer.clientWidth / 2, win32WindowBuffer.clientHeight / 2);
-		cout << cam.viewMatrix.m[0][0] << ", " << cam.viewMatrix.m[0][1] << ", " << cam.viewMatrix.m[0][2] << endl;
+		//**********************************************************Render mesh objects
 
+		pipeline.transform(mesh);
+
+		//pipeline.transform verticies
+			//perform z-culling first
+			//project, (don't divide by w)
+		//pipeline.clip verticies
+			//check if entire triangle lies outside viewing frustum
+			//clip in homogenous clip space
+		//pipeline. shade triangle (model, lights)
+			//sort verticies
+			//generate vertex, 1/z depth, z depth, lighting, and texture gradients
+			//step down (y axis) scan line, draw from left to right
+			//interpolate the textures, 1/z depth, z depth, and lighting
 
 
 
@@ -277,6 +240,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		win32WindowBuffer.drawBuffer();
 
 		hpc.Tick();
+		//if (hpc.mtimePerFrame > 0.033)
+			//Sleep(1000.0 * (hpc.mtimePerFrame - 0.033));
 		displayFPS(hpc, *win32WindowBuffer.getWindowHandle());
 		
 	}

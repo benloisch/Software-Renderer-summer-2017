@@ -5,6 +5,7 @@ Camera::Camera() {
 	lookDirection = Vector4D(0.0, 0.0, 0.0, 0.0);
 
 	nearPlane = farPlane = aspectRatio = fieldOfView = 0.0;
+	movX = movZ = 0.0;
 }
 
 void Camera::setOriginPosition(double ox, double oy, double oz) {
@@ -26,6 +27,8 @@ void Camera::setFarPlane(double fp) {
 
 void Camera::setAspectRatio(double width, double height) {
 	aspectRatio = width / height;
+	this->width = width;
+	this->height = height;
 }
 
 void Camera::setFieldOfView(double fov) {
