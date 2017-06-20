@@ -14,7 +14,7 @@ void Pipeline::transform(Mesh &inputMesh) {
 		//perform z-culling
 		if (((inputMesh.verticies[v + 1].v - inputMesh.verticies[v].v) ^
 			(inputMesh.verticies[v + 2].v - inputMesh.verticies[v].v)).z > 0) {
-			continue;
+			//continue;
 		}
 
 		verticies[0] = inputMesh.verticies[v];
