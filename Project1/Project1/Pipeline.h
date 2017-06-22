@@ -82,6 +82,8 @@ inline void Pipeline::shadeTriangle() {
 		double deltaX_TTB = (verticies[2].v.y - verticies[0].v.y) / (verticies[2].v.x - verticies[0].v.x);
 		double deltaX_TTM = (verticies[1].v.y - verticies[0].v.y) / (verticies[1].v.x - verticies[0].v.x);
 
+		//prestep
+		
 		//prestep to nearest scanline
 		//x = ((diffY) * (run / rise)) + (xOrigin)
 		double preStepY_left = verticies[0].v.y - ceil(verticies[0].v.y);
