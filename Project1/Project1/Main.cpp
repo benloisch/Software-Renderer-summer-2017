@@ -89,11 +89,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	Mesh mesh;
 
-	for (int i = 0; i < 10000; i++) {
-		mesh.verticies.push_back(Vertex(-1.0, 0.0, i + 1, 1.0)); //bottom left point of triangle
-		mesh.verticies.push_back(Vertex(0.0, 1.0, i + 1, 1.0)); //upper center point of triangle
-		mesh.verticies.push_back(Vertex(1.0, 0.5, i + 1, 1.0)); //lower right point of triangle
-	}
+	//for (int i = 0; i < 10000; i++) {
+		mesh.verticies.push_back(Vertex(-1.0, 0.0, 2, 1.0)); //bottom left point of triangle
+		mesh.verticies.push_back(Vertex(0.0, 1.0, 2, 1.0)); //upper center point of triangle
+		mesh.verticies.push_back(Vertex(1.0, 0.0, 2, 1.0)); //lower right point of triangle
+	//}
 
 	//***********************************************************Old StarField3D code
 	/*

@@ -55,87 +55,22 @@ inline void Pipeline::clipVerticies() {
 
 inline void Pipeline::shadeTriangle() {
 	sortVerticies();
-
-	//create a class that manages draw from left to right, scanline by scanline
 	
 	verticies[0].v /= verticies[0].v.w;
 	verticies[1].v /= verticies[1].v.w;
 	verticies[2].v /= verticies[2].v.w;
-	
-	for (int i = 0; i < 3; i++) {
-		Vertex v = verticies[i];
-		if (v.v.x <= -1.0 || v.v.x >= 1.0 || v.v.y <= -1.0 || v.v.y >= 1.0 || v.v.z <= 0 || v.v.z >= 1)
-			return;
 
-		verticies[i].v.x = ((v.v.x + 1.0) * 0.5 * cam->width);
-		verticies[i].v.y = ((v.v.y + 1.0) * 0.5 * cam->height);
+	for (int i = 0; i < 3; i++) {
+		if (verticies[i].v.x <= -1.0 || verticies[i].v.x >= 1.0 || verticies[i].v.y <= -1.0 || verticies[i].v.y >= 1.0 || verticies[i].v.z <= 0 || verticies[i].v.z >= 1)
+			return;
 	}
 
 	//if mid point is on left
-	if (((verticies[1].v - verticies[0].v) ^
-		(verticies[2].v - verticies[0].v)).z >= 0) {
+	//Cz = AxBy - A
 
-	}
-	else { //if mid point is on right
-
-		//draw from top to middle
-		double deltaX_TTB = (verticies[2].v.y - verticies[0].v.y) / (verticies[2].v.x - verticies[0].v.x);
-		double deltaX_TTM = (verticies[1].v.y - verticies[0].v.y) / (verticies[1].v.x - verticies[0].v.x);
-
-		//prestep
-		
-		//prestep to nearest scanline
-		//x = ((diffY) * (run / rise)) + (xOrigin)
-		double preStepY_left = verticies[0].v.y - ceil(verticies[0].v.y);
-		double lineX_left = preStepY_left * deltaX_TTB + verticies[0].v.x;
-
-		double preStepY_right = verticies[0].v.y - ceil(verticies[0].v.y);
-		double lineX_right = preStepY_right * deltaX_TTM + verticies[0].v.x;
-
-		for (int y = ceil(verticies[0].v.y); y > verticies[1].v.y; y--) {
-			
-			for (int x = ceil(lineX_left); x < ceil(lineX_right); x++) {
-				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-				*(pixelComponent) = (unsigned char)255;
-				*(pixelComponent + 1) = (unsigned char)255;
-				*(pixelComponent + 2) = (unsigned char)255;
-				*(pixelComponent + 3) = (unsigned char)0;
-			}
-
-			lineX_left -= deltaX_TTB;
-			lineX_right -= deltaX_TTM;
-		}
-		
-		//draw from middle to bottom
-		double deltaX_MTB = (verticies[2].v.y - verticies[1].v.y) / (verticies[2].v.x - verticies[1].v.x);
-
-		for (int y = ceil(verticies[1].v.y); y > verticies[2].v.y; y--) {
-
-			for (int x = ceil(lineX_left); x < ceil(lineX_right); x++) {
-				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-				*(pixelComponent) = (unsigned char)255;
-				*(pixelComponent + 1) = (unsigned char)255;
-				*(pixelComponent + 2) = (unsigned char)255;
-				*(pixelComponent + 3) = (unsigned char)0;
-			}
-
-			lineX_left -= deltaX_TTB;
-			lineX_right -= deltaX_MTB;
-		}
-
-
-	}
-	
-	/*
 	for (int i = 0; i < 3; i++) {
-		Vertex v = Vertex(verticies[i].v);
-		v.v /= v.v.w;
-
-		if (v.v.x <= -1.0 || v.v.x >= 1.0 || v.v.y <= -1.0 || v.v.y >= 1.0 || v.v.z <= 0 || v.v.z >= 1)
-			continue;
-
-		int screenX = (int)((v.v.x + 1) * 0.5 * cam->width);
-		int screenY = (int)((v.v.y + 1) * 0.5 * cam->height);
+		int screenX = (int)((verticies[i].v.x + 1) * 0.5 * cam->width);
+		int screenY = (int)((verticies[i].v.y + 1) * 0.5 * cam->height);
 
 		char *pixelComponent = buffer + ((screenY * (int)cam->width + screenX) * 4);
 		*(pixelComponent) = (unsigned char)255;
@@ -143,7 +78,7 @@ inline void Pipeline::shadeTriangle() {
 		*(pixelComponent + 2) = (unsigned char)255;
 		*(pixelComponent + 3) = (unsigned char)0;
 	}
-	*/
+	
 }
 
 inline void Pipeline::sortVerticies() {
