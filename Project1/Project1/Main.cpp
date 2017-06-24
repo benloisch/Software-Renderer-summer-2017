@@ -66,13 +66,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(0, 0, 0);
-	cam.setLookDirection(0, 0, 1);
+	cam.setOriginPosition(0, 10, -10);
+	cam.setLookDirection(-1, -1.0, 1);
 	cam.calculateViewMatrix();
 
 	//define projection matrix
 	cam.setNearPlane(0.1);
-	cam.setFarPlane(100);
+	cam.setFarPlane(1000);
 	cam.setAspectRatio(win32WindowBuffer.clientWidth, win32WindowBuffer.clientHeight);
 	cam.setFieldOfView(60);
 	cam.calculateProjectionMatrix();
@@ -90,9 +90,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	Mesh mesh;
 
 	//for (int i = 0; i < 10000; i++) {
-		mesh.verticies.push_back(Vertex(-1.0, 0.0, 2, 1.0)); //bottom left point of triangle
-		mesh.verticies.push_back(Vertex(0.0, 1.0, 2, 1.0)); //upper center point of triangle
-		mesh.verticies.push_back(Vertex(1.0, 0.0, 2, 1.0)); //lower right point of triangle
+		mesh.verticies.push_back(Vertex(-1.0, 1.0, 2, 1.0)); //upper left point of triangle
+		mesh.verticies.push_back(Vertex(1.0, 0.0, 2, 1.0)); //middle right center point of triangle
+		mesh.verticies.push_back(Vertex(-1.0, -1.0, 2, 1.0)); //lower left point of triangle
 	//}
 
 	//***********************************************************Old StarField3D code

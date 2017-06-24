@@ -56,18 +56,29 @@ inline void Pipeline::clipVerticies() {
 inline void Pipeline::shadeTriangle() {
 	sortVerticies();
 	
+	//project from homogenous clip space to NDC space
 	verticies[0].v /= verticies[0].v.w;
 	verticies[1].v /= verticies[1].v.w;
 	verticies[2].v /= verticies[2].v.w;
 
+	//this clipping will take place in the clipVerticies() function
 	for (int i = 0; i < 3; i++) {
 		if (verticies[i].v.x <= -1.0 || verticies[i].v.x >= 1.0 || verticies[i].v.y <= -1.0 || verticies[i].v.y >= 1.0 || verticies[i].v.z <= 0 || verticies[i].v.z >= 1)
 			return;
 	}
 
-	//if mid point is on left
-	//Cz = AxBy - A
+	Vertex top = verticies[0];
+	Vertex mid = verticies[1];
+	Vertex bot = verticies[2];
 
+	top.v.x = ((top.v.x + 1.0) * 0.5 * cam->width);
+	top.v.y = ((top.v.y + 1.0) * 0.5 * cam->height);
+	mid.v.x = ((mid.v.x + 1.0) * 0.5 * cam->width);
+	mid.v.y = ((mid.v.y + 1.0) * 0.5 * cam->height);
+	bot.v.x = ((bot.v.x + 1.0) * 0.5 * cam->width);
+	bot.v.y = ((bot.v.y + 1.0) * 0.5 * cam->height);
+
+	/*
 	for (int i = 0; i < 3; i++) {
 		int screenX = (int)((verticies[i].v.x + 1) * 0.5 * cam->width);
 		int screenY = (int)((verticies[i].v.y + 1) * 0.5 * cam->height);
@@ -77,6 +88,79 @@ inline void Pipeline::shadeTriangle() {
 		*(pixelComponent + 1) = (unsigned char)255;
 		*(pixelComponent + 2) = (unsigned char)255;
 		*(pixelComponent + 3) = (unsigned char)0;
+	}
+	return;
+	*/
+
+	//if mid point is on right
+	//Cz = AxBy - AyBx
+	if (((top.v.x - mid.v.x) * (top.v.y - bot.v.y)) - ((top.v.y - mid.v.y) * (top.v.x - bot.v.x)) < 0) {
+		
+		double topToMidXStep = (mid.v.x - top.v.x) / (mid.v.y - top.v.y); //-1.1, 0.53
+		double topToBotXStep = (bot.v.x - top.v.x) / (bot.v.y - top.v.y); //0.53, -1.1
+		//double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
+		//double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
+
+		double leftX = top.v.x;
+		double rightX = top.v.x;
+
+		//draw scanlines from top.y to mid.y
+		for (int y = top.v.y; y > mid.v.y; y--) {
+			for (int x = leftX; x < rightX; x++) {
+
+				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+				*(pixelComponent) = (unsigned char)255;
+				*(pixelComponent + 1) = (unsigned char)255;
+				*(pixelComponent + 2) = (unsigned char)255;
+				*(pixelComponent + 3) = (unsigned char)0;
+			}
+			
+			leftX -= topToBotXStep;
+			rightX -= topToMidXStep;
+
+		}
+
+		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y); //0.53, -1.1
+
+		for (int y = mid.v.y; y > bot.v.y; y--) {
+			for (int x = leftX; x < rightX; x++) {
+
+				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+				*(pixelComponent) = (unsigned char)255;
+				*(pixelComponent + 1) = (unsigned char)255;
+				*(pixelComponent + 2) = (unsigned char)255;
+				*(pixelComponent + 3) = (unsigned char)0;
+			}
+
+			leftX -= topToBotXStep;
+			rightX -= midToBotXStep;
+
+		}
+	}
+	else {
+		double topToMidXStep = (mid.v.x - top.v.x) / (mid.v.y - top.v.y); //-1.1, 0.53
+		double topToBotXStep = (bot.v.x - top.v.x) / (bot.v.y - top.v.y); //0.53, -1.1
+		//double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
+		//double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
+
+		double leftX = top.v.x;
+		double rightX = top.v.x;
+
+		//draw scanlines from top.y to mid.y
+		for (int y = top.v.y; y > mid.v.y; y--) {
+			for (int x = leftX; x < rightX; x++) {
+
+				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+				*(pixelComponent) = (unsigned char)255;
+				*(pixelComponent + 1) = (unsigned char)255;
+				*(pixelComponent + 2) = (unsigned char)255;
+				*(pixelComponent + 3) = (unsigned char)0;
+			}
+
+			leftX -= topToMidXStep;
+			rightX -= topToBotXStep;
+
+		}
 	}
 	
 }
