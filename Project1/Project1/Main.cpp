@@ -50,7 +50,7 @@ int main() {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1920, 1080);
+	Win32WindowBuffer win32WindowBuffer(1366, 768);
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -66,8 +66,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(0, 10, -10);
-	cam.setLookDirection(-1, -1.0, 1);
+	cam.setOriginPosition(0, 0, 0);
+	cam.setLookDirection(0, 0, 1);
 	cam.calculateViewMatrix();
 
 	//define projection matrix
@@ -90,10 +90,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	Mesh mesh;
 
 	//for (int i = 0; i < 10000; i++) {
-		mesh.verticies.push_back(Vertex(-1.0, 1.0, 2, 1.0)); //upper left point of triangle
-		mesh.verticies.push_back(Vertex(1.0, 0.0, 2, 1.0)); //middle right center point of triangle
-		mesh.verticies.push_back(Vertex(-1.0, -1.0, 2, 1.0)); //lower left point of triangle
+		mesh.verticies.push_back(Vertex(-1.0, -1.0, 0, 1.0)); //upper left point of triangle
+		mesh.verticies.push_back(Vertex(0.0, 1.0, 0, 1.0)); //middle right center point of triangle
+		mesh.verticies.push_back(Vertex(1.0, -1.0, 0, 1.0)); //lower left point of triangle
 	//}
+
+		//mesh.verticies.push_back(Vertex(1.0, 1.0, 0, 1.0)); //upper left point of triangle
+		//mesh.verticies.push_back(Vertex(0.0, 1.0, 0, 1.0)); //middle right center point of triangle
+		//mesh.verticies.push_back(Vertex(1.0, -1.0, 0, 1.0)); //lower left point of triangle
 
 	//***********************************************************Old StarField3D code
 	/*
@@ -208,6 +212,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 		//*********************************************************Get delta (time spent rendering a single frame in miliseconds)
 		double delta = hpc.mtimePerFrame;
+		
+		static double rot = 0;
+		rot += delta;
+
+		mesh.modelMesh.setYrot(rot * 10);
+		mesh.modelMesh.setTranslate(0, 0, 5);
 
 		win32WindowBuffer.FillBufferColor(255, 255, 255);
 		win32WindowBuffer.FillBufferColor(0, 0, 0);

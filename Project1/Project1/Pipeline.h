@@ -53,13 +53,13 @@ inline void Pipeline::clipVerticies() {
 	//clip in homogenous clip space
 }
 
-inline void Pipeline::shadeTriangle() {
-	sortVerticies();
-	
+inline void Pipeline::shadeTriangle() {	
 	//project from homogenous clip space to NDC space
 	verticies[0].v /= verticies[0].v.w;
 	verticies[1].v /= verticies[1].v.w;
 	verticies[2].v /= verticies[2].v.w;
+
+	sortVerticies();
 
 	//this clipping will take place in the clipVerticies() function
 	for (int i = 0; i < 3; i++) {
@@ -76,37 +76,23 @@ inline void Pipeline::shadeTriangle() {
 	mid.v.x = ((mid.v.x + 1.0) * 0.5 * cam->width);
 	mid.v.y = ((mid.v.y + 1.0) * 0.5 * cam->height);
 	bot.v.x = ((bot.v.x + 1.0) * 0.5 * cam->width);
-	bot.v.y = ((bot.v.y + 1.0) * 0.5 * cam->height);
-
-	/*
-	for (int i = 0; i < 3; i++) {
-		int screenX = (int)((verticies[i].v.x + 1) * 0.5 * cam->width);
-		int screenY = (int)((verticies[i].v.y + 1) * 0.5 * cam->height);
-
-		char *pixelComponent = buffer + ((screenY * (int)cam->width + screenX) * 4);
-		*(pixelComponent) = (unsigned char)255;
-		*(pixelComponent + 1) = (unsigned char)255;
-		*(pixelComponent + 2) = (unsigned char)255;
-		*(pixelComponent + 3) = (unsigned char)0;
-	}
-	return;
-	*/
+	bot.v.y = ((bot.v.y + 1.0) * 0.5 * cam->height);	
 
 	//if mid point is on right
 	//Cz = AxBy - AyBx
 	if (((top.v.x - mid.v.x) * (top.v.y - bot.v.y)) - ((top.v.y - mid.v.y) * (top.v.x - bot.v.x)) < 0) {
 		
-		double topToMidXStep = (mid.v.x - top.v.x) / (mid.v.y - top.v.y); //-1.1, 0.53
-		double topToBotXStep = (bot.v.x - top.v.x) / (bot.v.y - top.v.y); //0.53, -1.1
-		//double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
-		//double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
+		double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
+		double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
 
-		double leftX = top.v.x;
-		double rightX = top.v.x;
+		double leftX = top.v.x + ((floor(top.v.y) - top.v.y) * topToBotXStep);
+		//double leftX = top.v.x;
+		double rightX = top.v.x + ((floor(top.v.y) - top.v.y) * topToMidXStep);
+		//double rightX = top.v.x;
 
 		//draw scanlines from top.y to mid.y
-		for (int y = top.v.y; y > mid.v.y; y--) {
-			for (int x = leftX; x < rightX; x++) {
+		for (int y = floor(top.v.y); y > floor(mid.v.y); y--) {
+			for (int x = floor(leftX); x < floor(rightX); x++) {
 
 				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
 				*(pixelComponent) = (unsigned char)255;
@@ -120,10 +106,14 @@ inline void Pipeline::shadeTriangle() {
 
 		}
 
-		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y); //0.53, -1.1
+		
+		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
+		
+		rightX = mid.v.x + ((floor(mid.v.y) - mid.v.y) * midToBotXStep);
+		//rightX = mid.v.x;
 
-		for (int y = mid.v.y; y > bot.v.y; y--) {
-			for (int x = leftX; x < rightX; x++) {
+		for (int y = floor(mid.v.y); y > floor(bot.v.y); y--) {
+			for (int x = floor(leftX); x < floor(rightX); x++) {
 
 				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
 				*(pixelComponent) = (unsigned char)255;
@@ -136,19 +126,21 @@ inline void Pipeline::shadeTriangle() {
 			rightX -= midToBotXStep;
 
 		}
+		
 	}
 	else {
-		double topToMidXStep = (mid.v.x - top.v.x) / (mid.v.y - top.v.y); //-1.1, 0.53
-		double topToBotXStep = (bot.v.x - top.v.x) / (bot.v.y - top.v.y); //0.53, -1.1
-		//double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
-		//double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
+		
+		double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
+		double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
 
-		double leftX = top.v.x;
-		double rightX = top.v.x;
+		double leftX = top.v.x + ((floor(top.v.y) - top.v.y) * topToMidXStep);
+		//double leftX = top.v.x;
+		double rightX = top.v.x + ((floor(top.v.y) - top.v.y) * topToBotXStep);
+		//double rightX = top.v.x;
 
 		//draw scanlines from top.y to mid.y
-		for (int y = top.v.y; y > mid.v.y; y--) {
-			for (int x = leftX; x < rightX; x++) {
+		for (int y = floor(top.v.y); y > floor(mid.v.y); y--) {
+			for (int x = floor(leftX); x < floor(rightX); x++) {
 
 				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
 				*(pixelComponent) = (unsigned char)255;
@@ -161,8 +153,42 @@ inline void Pipeline::shadeTriangle() {
 			rightX -= topToBotXStep;
 
 		}
+
+
+		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
+		
+		leftX = mid.v.x + ((floor(mid.v.y) - mid.v.y) * midToBotXStep);
+		//leftX = mid.v.x;
+
+		for (int y = floor(mid.v.y); y > floor(bot.v.y); y--) {
+			for (int x = floor(leftX); x < floor(rightX); x++) {
+
+				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+				*(pixelComponent) = (unsigned char)255;
+				*(pixelComponent + 1) = (unsigned char)255;
+				*(pixelComponent + 2) = (unsigned char)255;
+				*(pixelComponent + 3) = (unsigned char)0;
+			}
+
+			leftX -= midToBotXStep;
+			rightX -= topToBotXStep;
+
+		}
+		
 	}
-	
+
+	/*
+	for (int i = 0; i < 3; i++) {
+		int screenX = (int)((verticies[i].v.x + 1) * 0.5 * cam->width);
+		int screenY = (int)((verticies[i].v.y + 1) * 0.5 * cam->height);
+
+		char *pixelComponent = buffer + ((screenY * (int)cam->width + screenX) * 4);
+		*(pixelComponent) = (unsigned char)255;
+		*(pixelComponent + 1) = (unsigned char)0;
+		*(pixelComponent + 2) = (unsigned char)0;
+		*(pixelComponent + 3) = (unsigned char)0;
+	}
+	*/
 }
 
 inline void Pipeline::sortVerticies() {
