@@ -5,6 +5,7 @@
 
 #include "Vertex.h"
 #include "Vector4D.h"
+#include "ImageBMP.h"
 
 using namespace std;
 
@@ -16,6 +17,7 @@ public:
 	vector<Vertex> verticies;
 	vector<Vector4D> normals;
 	vector<Vector4D> texCoords;
+	ImageBMP *texture;
 
 private:
 

@@ -11,12 +11,6 @@ void Pipeline::transform(Mesh &inputMesh) {
 
 	for (unsigned int v = 0; v < inputMesh.verticies.size(); v += 3) {
 
-		//perform z-culling
-		if (((inputMesh.verticies[v + 1].v - inputMesh.verticies[v].v) ^
-			(inputMesh.verticies[v + 2].v - inputMesh.verticies[v].v)).z > 0) {
-			//continue;
-		}
-
 		verticies[0] = inputMesh.verticies[v];
 		verticies[1] = inputMesh.verticies[v+1];
 		verticies[2] = inputMesh.verticies[v+2];

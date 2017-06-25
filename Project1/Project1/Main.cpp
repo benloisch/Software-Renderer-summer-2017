@@ -89,15 +89,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	Mesh mesh;
 
-	//for (int i = 0; i < 10000; i++) {
-		mesh.verticies.push_back(Vertex(-1.0, -1.0, 0, 1.0)); //upper left point of triangle
-		mesh.verticies.push_back(Vertex(0.0, 1.0, 0, 1.0)); //middle right center point of triangle
-		mesh.verticies.push_back(Vertex(1.0, -1.0, 0, 1.0)); //lower left point of triangle
-	//}
+	//top left triangle
+	mesh.verticies.push_back(Vertex(-1.0, -1.0, 0, 1.0));
+	mesh.verticies.push_back(Vertex(-1.0, 1.0, 0, 1.0));
+	mesh.verticies.push_back(Vertex(1.0, 1.0, 0, 1.0));
+	
+	//bottom right triangle
+	mesh.verticies.push_back(Vertex(1.0, -1.0, 0, 1.0));
+	mesh.verticies.push_back(Vertex(-1.0, -1.0, 0, 1.0));
+	mesh.verticies.push_back(Vertex(1.0, 1.0, 0, 1.0));
 
-		//mesh.verticies.push_back(Vertex(1.0, 1.0, 0, 1.0)); //upper left point of triangle
-		//mesh.verticies.push_back(Vertex(0.0, 1.0, 0, 1.0)); //middle right center point of triangle
-		//mesh.verticies.push_back(Vertex(1.0, -1.0, 0, 1.0)); //lower left point of triangle
+	
+	for (int i = 0; i < 5000; i++) {
+		mesh.verticies.push_back(Vertex(-1.0, -1.0, i, 1.0));
+		mesh.verticies.push_back(Vertex(-1.0, 1.0, i, 1.0));
+		mesh.verticies.push_back(Vertex(1.0, 1.0, i, 1.0));
+
+		//bottom right triangle
+		mesh.verticies.push_back(Vertex(1.0, -1.0, i, 1.0));
+		mesh.verticies.push_back(Vertex(-1.0, -1.0, i, 1.0));
+		mesh.verticies.push_back(Vertex(1.0, 1.0, i, 1.0));
+	}
+	
+	mesh.texture = new ImageBMP;
+	
 
 	//***********************************************************Old StarField3D code
 	/*

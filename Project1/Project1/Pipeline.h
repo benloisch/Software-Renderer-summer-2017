@@ -54,10 +54,17 @@ inline void Pipeline::clipVerticies() {
 }
 
 inline void Pipeline::shadeTriangle() {	
+
 	//project from homogenous clip space to NDC space
 	verticies[0].v /= verticies[0].v.w;
 	verticies[1].v /= verticies[1].v.w;
 	verticies[2].v /= verticies[2].v.w;
+
+	//perform z-culling
+	if (((verticies[1].v - verticies[0].v) ^
+		(verticies[2].v - verticies[0].v)).z > 0) {
+		return;
+	}
 
 	sortVerticies();
 
@@ -92,7 +99,7 @@ inline void Pipeline::shadeTriangle() {
 
 		//draw scanlines from top.y to mid.y
 		for (int y = floor(top.v.y); y > floor(mid.v.y); y--) {
-			for (int x = floor(leftX); x < floor(rightX); x++) {
+			for (int x = floor(leftX); x <= floor(rightX); x++) {
 
 				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
 				*(pixelComponent) = (unsigned char)255;
@@ -113,7 +120,7 @@ inline void Pipeline::shadeTriangle() {
 		//rightX = mid.v.x;
 
 		for (int y = floor(mid.v.y); y > floor(bot.v.y); y--) {
-			for (int x = floor(leftX); x < floor(rightX); x++) {
+			for (int x = floor(leftX); x <= floor(rightX); x++) {
 
 				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
 				*(pixelComponent) = (unsigned char)255;
@@ -140,7 +147,7 @@ inline void Pipeline::shadeTriangle() {
 
 		//draw scanlines from top.y to mid.y
 		for (int y = floor(top.v.y); y > floor(mid.v.y); y--) {
-			for (int x = floor(leftX); x < floor(rightX); x++) {
+			for (int x = floor(leftX); x <= floor(rightX); x++) {
 
 				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
 				*(pixelComponent) = (unsigned char)255;
@@ -161,7 +168,7 @@ inline void Pipeline::shadeTriangle() {
 		//leftX = mid.v.x;
 
 		for (int y = floor(mid.v.y); y > floor(bot.v.y); y--) {
-			for (int x = floor(leftX); x < floor(rightX); x++) {
+			for (int x = floor(leftX); x <= floor(rightX); x++) {
 
 				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
 				*(pixelComponent) = (unsigned char)255;
