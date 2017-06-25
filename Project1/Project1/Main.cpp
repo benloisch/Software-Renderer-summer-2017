@@ -99,7 +99,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	mesh.verticies.push_back(Vertex(-1.0, -1.0, 0, 1.0));
 	mesh.verticies.push_back(Vertex(1.0, 1.0, 0, 1.0));
 
-	
+	/*
 	for (int i = 0; i < 5000; i++) {
 		mesh.verticies.push_back(Vertex(-1.0, -1.0, i, 1.0));
 		mesh.verticies.push_back(Vertex(-1.0, 1.0, i, 1.0));
@@ -110,6 +110,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		mesh.verticies.push_back(Vertex(-1.0, -1.0, i, 1.0));
 		mesh.verticies.push_back(Vertex(1.0, 1.0, i, 1.0));
 	}
+	*/
 	
 	mesh.texture = new ImageBMP;
 	
