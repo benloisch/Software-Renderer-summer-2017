@@ -3,30 +3,29 @@
 Pipeline::Pipeline() {
 	buffer = NULL;
 	cam = NULL;
+	mesh = NULL;
 }
 
-void Pipeline::transform(Mesh &inputMesh) {
+void Pipeline::transform(Mesh *inputMesh) {
 
-	MVP = inputMesh.modelMesh * cam->viewMatrix.inverse() * cam->projectionMatrix;
+	mesh = inputMesh;
 
-	for (unsigned int v = 0; v < inputMesh.verticies.size(); v += 3) {
+	Matrix4x4 MVP = mesh->modelMesh * cam->viewMatrix.inverse() * cam->projectionMatrix;
 
-		verticies[0] = inputMesh.verticies[v];
-		verticies[1] = inputMesh.verticies[v+1];
-		verticies[2] = inputMesh.verticies[v+2];
+	for (unsigned int v = 0; v < mesh->verticies.size(); v += 3) {
 
-		/*
-		texCoords[0] = inputMesh.texCoords[v];
-		texCoords[1] = inputMesh.texCoords[v+1];
-		texCoords[2] = inputMesh.texCoords[v+2];
+		vector<Vertex> verticies(3);
 
-		normals[0] = inputMesh.normals[v];
-		normals[1] = inputMesh.normals[v+1];
-		normals[2] = inputMesh.normals[v+2];
-		*/
+		verticies[0] = mesh->verticies[v];
+		verticies[1] = mesh->verticies[v + 1];
+		verticies[2] = mesh->verticies[v + 2];
 
-		projectVerticies();
-		clipVerticies();
-		shadeTriangle();
+		projectVerticies(&verticies[0], MVP);
+		
+		//clip and add extra verticies in clockwise order
+		clipVerticies(&verticies[0]);
+		
+		for (unsigned int i = 0; i < verticies.size() - 2; i++)
+			shadeTriangle(&verticies[i], &verticies[i].t, &verticies[i].n);
 	}
 }

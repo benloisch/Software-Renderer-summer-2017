@@ -27,7 +27,7 @@ public:
 	Vector4D& operator+=(const Vector4D &vector);
 	Vector4D& operator-=(const Vector4D &vector);
 	Vector4D& operator*=(const int integer);//componentwise integer multiplication
-	Vector4D& operator*=(const double doubleing);//componentwise floating point multiplication
+	Vector4D& operator*=(const double floating);//componentwise floating point multiplication
 	Vector4D& operator/=(const int integer);//componentwise integer division
 	Vector4D& operator/=(const double floating);//componentwise floating point division
 	Vector4D operator*(const int integer);//componentwise integer multiplication
@@ -65,6 +65,7 @@ Vector4D& Vector4D::operator=(const Vector4D &vector)
 	this->x = vector.x;
 	this->y = vector.y;
 	this->z = vector.z;
+	this->w = vector.w;
 
 	return *this;
 }

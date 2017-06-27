@@ -6,14 +6,13 @@
 class Vertex {
 public:
 	Vector4D v;
+	Vector4D t;
+	Vector4D n;
 
-	Vertex() : v(0, 0, 0, 0) {}
-	Vertex(double x, double y, double z, double w) : v(x, y, z, w) {}
+	Vertex() : v(0, 0, 0, 0), t(0, 0, 0, 0), n(0, 0, 0, 0) {}
+	Vertex(Vector4D &vin, Vector4D &tin, Vector4D &nin);
 
-	Vertex(const Vertex &vertex);
-	Vertex(const Vector4D &vector);
-	Vertex& operator=(const Vertex &vertex);
-	Vertex& operator=(const Vector4D &vector);
+	inline Vertex& operator=(const Vertex &vertex);
 
 private:
 
@@ -28,16 +27,12 @@ Vertex& Vertex::operator=(const Vertex &vertex)
 	this->v.z = vertex.v.z;
 	this->v.w = vertex.v.w;
 
-	return *this;
-}
+	this->t.x = vertex.t.x;
+	this->t.y = vertex.t.y;
 
-inline
-Vertex& Vertex::operator=(const Vector4D &vector)
-{
-	this->v.x = vector.x;
-	this->v.y = vector.y;
-	this->v.z = vector.z;
-	this->v.w = vector.w;
+	this->n.x = vertex.n.x;
+	this->n.y = vertex.n.y;
+	this->n.z = vertex.n.z;
 
 	return *this;
 }

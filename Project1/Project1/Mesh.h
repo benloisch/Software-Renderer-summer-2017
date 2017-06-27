@@ -15,8 +15,6 @@ public:
 
 	Matrix4x4 modelMesh;
 	vector<Vertex> verticies;
-	vector<Vector4D> normals;
-	vector<Vector4D> texCoords;
 	ImageBMP *texture;
 
 private:

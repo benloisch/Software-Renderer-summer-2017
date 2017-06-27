@@ -97,7 +97,7 @@ void ImageBMP::createBMP(unsigned int width, unsigned int height, string fileNam
 void ImageBMP::loadBMP(string inFileName) {
 	cout << "Loading BMP file..." << endl;
 	//open bmp and read width, height, and get Color_RGB data
-	FILE *file;
+	FILE *file = NULL;
 	string openFile = inFileName;
 	if (fopen_s(&file, openFile.append(".bmp").c_str(), "rb") == 0) {
 

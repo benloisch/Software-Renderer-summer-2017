@@ -37,7 +37,7 @@ public:
 		blue[x][y] = b;
 	}
 	inline 
-	Color_RGB ImageBMP::getPixelColor(unsigned int x, unsigned int y) {
+	Color_RGB ImageBMP::getPixelColor(int x, int y) {
 		Color_RGB rgb;
 
 		try {

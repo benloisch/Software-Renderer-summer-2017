@@ -156,19 +156,23 @@ inline void Camera::getInput(double &delta)
 
 	if (mouseNow.y - sMouse.y > 0)
 	{
-		double diff = mouseNow.y - sMouse.y;
-		diff *= 10.1 * delta;
-		rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
-		lookDirection *= rot;
-		lookDirection.normalize();
+		if (lookDirection.y > -0.999) {
+			double diff = mouseNow.y - sMouse.y;
+			diff *= 10.1 * delta;
+			rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
+			lookDirection *= rot;
+			lookDirection.normalize();
+		}
 	}
 	else if (mouseNow.y - sMouse.y < 0)
 	{
-		double diff = mouseNow.y - sMouse.y;
-		diff *= 10.1 * delta;
-		rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
-		lookDirection *= rot;
-		lookDirection.normalize();
+		if (lookDirection.y < 0.999) {
+			double diff = mouseNow.y - sMouse.y;
+			diff *= 10.1 * delta;
+			rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
+			lookDirection *= rot;
+			lookDirection.normalize();
+		}
 	}
 	sMouse = mouseNow;
 	SetCursorPos((int)(width / 2), (int)(height / 2));
