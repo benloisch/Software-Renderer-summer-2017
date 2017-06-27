@@ -1,1 +1,0 @@
-# Software-Renderer-summer-2017
