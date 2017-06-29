@@ -156,7 +156,7 @@ inline void Camera::getInput(double &delta)
 
 	if (mouseNow.y - sMouse.y > 0)
 	{
-		if (lookDirection.y > -0.999) {
+		if (lookDirection.y > -0.9) {
 			double diff = mouseNow.y - sMouse.y;
 			diff *= 10.1 * delta;
 			rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
@@ -166,7 +166,7 @@ inline void Camera::getInput(double &delta)
 	}
 	else if (mouseNow.y - sMouse.y < 0)
 	{
-		if (lookDirection.y < 0.999) {
+		if (lookDirection.y < 0.9) {
 			double diff = mouseNow.y - sMouse.y;
 			diff *= 10.1 * delta;
 			rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis

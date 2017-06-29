@@ -9,6 +9,8 @@
 class Pipeline {
 public:
 
+	float* depthBuffer;
+
 	char* buffer;
 	Camera *cam;
 
@@ -21,6 +23,8 @@ public:
 	Pipeline();
 	void setScreenBuffer(char *inputBuffer);
 	void setCamera(Camera *inputCam);
+	inline void clearDepthBuffer();
+
 	void transform(Mesh *inputMesh);
 	inline void projectVerticies(Vertex verticies[3], Matrix4x4 &MVP);
 	inline void clipVerticies(Vertex verticies[3]);
@@ -38,12 +42,19 @@ private:
 
 };
 
+inline void Pipeline::clearDepthBuffer() {
+	for (int i = 0; i < (int)cam->width*cam->height; i++) {
+		depthBuffer[i] = FLT_MAX;
+	}
+}
+
 inline void Pipeline::setScreenBuffer(char *inputBuffer) {
 	buffer = inputBuffer;
 }
 
 inline void Pipeline::setCamera(Camera *inputCam) {
 	cam = inputCam;
+	depthBuffer = new float[(int)((cam->width)*(cam->height))];
 }
 
 inline void Pipeline::projectVerticies(Vertex verticies[3], Matrix4x4 &MVP) {
@@ -103,6 +114,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 	double inverseZXStep = gradientDcDx(1.0 / top.v.w, 1.0 / mid.v.w, 1.0 / bot.v.w, verticies);
 	double inverseZYStep = gradientDcDy(1.0 / top.v.w, 1.0 / mid.v.w, 1.0 / bot.v.w, verticies);
 
+	double depthZXStep = gradientDcDx(top.v.z, mid.v.z, bot.v.z, verticies);
+	double depthZYStep = gradientDcDy(top.v.z, mid.v.z, bot.v.z, verticies);
+
 	//if mid point is on right
 	//Cz = AxBy - AyBx
 	if (((top.v.x - mid.v.x) * (top.v.y - bot.v.y)) - ((top.v.y - mid.v.y) * (top.v.x - bot.v.x)) < 0) {
@@ -116,6 +130,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double leftX = top.v.x + (yPreStep * topToBotXStep);
 		double rightX = top.v.x + (yPreStep * topToMidXStep);
 		
+		//z depth coordinate
+		double depthZStartLeft = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		double depthZNextLineLeft = depthZYStep + (depthZXStep * topToBotXStep);
 		//inverse z coordinate
 		double inverseZStartLeft = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		double inverseZNextLineLeft = inverseZYStep + (inverseZXStep * topToBotXStep);
@@ -127,6 +144,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double texCoordYNextLineLeft = textureYYStep + (textureYXStep * topToBotXStep);
 
 		xPreStep = yPreStep * topToMidXStep;
+		//z depth coordinate
+		double depthZStartRight = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		double depthZNextLineRight = depthZYStep + (depthZXStep * topToMidXStep);
 		//inverse z coordinate
 		double inverseZStartRight = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		double inverseZNextLineRight = inverseZYStep + (inverseZXStep * topToMidXStep);
@@ -145,10 +165,12 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
 			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
 			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
 			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
 
@@ -162,17 +184,20 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 
 				//Color_RGB color(mesh->texture->getPixelColor((int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5), (int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)));
 
+				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 3) = (unsigned char)0;
 
-
-				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-				*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 3) = (unsigned char)0;
+					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
+				depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -187,6 +212,8 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			texCoordStartYRight -= texCoordYNextLineRight;
 			inverseZStartLeft -= inverseZNextLineLeft;
 			inverseZStartRight -= inverseZNextLineRight;
+			depthZStartLeft -= depthZNextLineLeft;
+			depthZStartRight -= depthZNextLineRight;
 		}
 		
 		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
@@ -197,7 +224,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		rightX = mid.v.x + (yPreStep * midToBotXStep);
 
 		xPreStep = yPreStep * midToBotXStep;
-		
+		//z depth coordinate
+		depthZStartRight = mid.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		depthZNextLineRight = depthZYStep + (depthZXStep * midToBotXStep);
 		//inverse z coordinate
 		inverseZStartRight = (1.0 / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		inverseZNextLineRight = inverseZYStep + (inverseZXStep * midToBotXStep);
@@ -215,10 +244,12 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
 			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
 			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
 			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
 
@@ -232,15 +263,20 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 
 				//Color_RGB color(mesh->texture->getPixelColor((int)((texX)*(mesh->texture->width - 1) + 0.5), (int)((texY)*(mesh->texture->height - 1) + 0.5)));
 
-				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-				*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 3) = (unsigned char)0;
+				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 3) = (unsigned char)0;
+
+					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
+				depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -255,6 +291,8 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			texCoordStartYRight -= texCoordYNextLineRight;
 			inverseZStartLeft -= inverseZNextLineLeft;
 			inverseZStartRight -= inverseZNextLineRight;
+			depthZStartLeft -= depthZNextLineLeft;
+			depthZStartRight -= depthZNextLineRight;
 		}
 		
 	}
@@ -269,6 +307,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double leftX = top.v.x + (yPreStep * topToMidXStep);
 		double rightX = top.v.x + (yPreStep * topToBotXStep);
 
+		//z depth coordinate
+		double depthZStartLeft = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		double depthZNextLineLeft = depthZYStep + (depthZXStep * topToBotXStep);
 		//inverse z coordinate
 		double inverseZStartLeft = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		double inverseZNextLineLeft = inverseZYStep + (inverseZXStep * topToMidXStep);
@@ -280,6 +321,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double texCoordYNextLineLeft = textureYYStep + (textureYXStep * topToMidXStep);
 
 		xPreStep = yPreStep * topToBotXStep;
+		//z depth coordinate
+		double depthZStartRight = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		double depthZNextLineRight = depthZYStep + (depthZXStep * topToBotXStep);
 		//inverse z coordinate
 		double inverseZStartRight = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		double inverseZNextLineRight = inverseZYStep + (inverseZXStep * topToBotXStep);
@@ -298,10 +342,12 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
 			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
 			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
 			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
 
@@ -315,15 +361,20 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 
 				//Color_RGB color(mesh->texture->getPixelColor((int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5), (int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)));
 
-				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-				*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 3) = (unsigned char)0;
+				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 3) = (unsigned char)0;
+
+					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
+				depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -338,6 +389,8 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			texCoordStartYRight -= texCoordYNextLineRight;
 			inverseZStartLeft -= inverseZNextLineLeft;
 			inverseZStartRight -= inverseZNextLineRight;
+			depthZStartLeft -= depthZNextLineLeft;
+			depthZStartRight -= depthZNextLineRight;
 		}
 		
 		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
@@ -349,6 +402,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 
 		xPreStep = yPreStep * midToBotXStep;
 
+		//z depth coordinate
+		depthZStartLeft = mid.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		depthZNextLineLeft = depthZYStep + (depthZXStep * midToBotXStep);
 		//inverse z coordinate
 		inverseZStartLeft = (1.0 / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		inverseZNextLineLeft = inverseZYStep + (inverseZXStep * midToBotXStep);
@@ -366,10 +422,12 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
 			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
 			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
 			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
 
@@ -381,17 +439,22 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 					int stop = 0;
 				}
 
-				Color_RGB color(mesh->texture->getPixelColor((int)((texX)*(mesh->texture->width - 1) + 0.5), (int)((texY)*(mesh->texture->height - 1) + 0.5)));
+				//Color_RGB color(mesh->texture->getPixelColor((int)((texX)*(mesh->texture->width - 1) + 0.5), (int)((texY)*(mesh->texture->height - 1) + 0.5)));
 
-				char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-				*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-				*(pixelComponent + 3) = (unsigned char)0;
+				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 3) = (unsigned char)0;
+
+					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
+				depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -406,6 +469,8 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			texCoordStartYRight -= texCoordYNextLineRight;
 			inverseZStartLeft -= inverseZNextLineLeft;
 			inverseZStartRight -= inverseZNextLineRight;
+			depthZStartLeft -= depthZNextLineLeft;
+			depthZStartRight -= depthZNextLineRight;
 		}
 		
 	}
