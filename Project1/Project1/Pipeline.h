@@ -124,7 +124,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
 		double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
 
-		double yPreStep = floor(top.v.y) - top.v.y;
+		double yPreStep = int(top.v.y) - top.v.y;
 		double xPreStep = yPreStep * topToBotXStep;
 
 		double leftX = top.v.x + (yPreStep * topToBotXStep);
@@ -158,9 +158,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double texCoordYNextLineRight = textureYYStep + (textureYXStep * topToMidXStep);
 		
 		//draw scanlines from top.y to mid.y
-		for (int y = (int)floor(top.v.y); y > (int)floor(mid.v.y); y--) {
+		for (int y = (int)(top.v.y); y > (int)(mid.v.y); y--) {
 			
-			double xPreStep = ceil(leftX) - leftX;
+			double xPreStep = int(leftX + 1.0) - leftX;
 			double xdist = rightX - leftX;
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
@@ -172,7 +172,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
 			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
-			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
+			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
 				double texX = textureCoordX*z;
@@ -218,7 +218,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		
 		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
 		
-		yPreStep = floor(mid.v.y) - mid.v.y;
+		yPreStep = int(mid.v.y) - mid.v.y;
 		xPreStep = yPreStep * midToBotXStep;
 
 		rightX = mid.v.x + (yPreStep * midToBotXStep);
@@ -237,9 +237,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		texCoordStartYRight = mid.t.y * (1.0 / mid.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
 		texCoordYNextLineRight = textureYYStep + (textureYXStep * midToBotXStep);
 
-		for (int y = (int)floor(mid.v.y); y > (int)floor(bot.v.y); y--) {
+		for (int y = (int)(mid.v.y); y > (int)(bot.v.y); y--) {
 
-			double xPreStep = ceil(leftX) - leftX;
+			double xPreStep = int(leftX + 1.0) - leftX;
 			double xdist = rightX - leftX;
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
@@ -251,7 +251,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
 			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
-			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
+			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
 				double texX = textureCoordX * z;
@@ -301,7 +301,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
 		double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
 
-		double yPreStep = floor(top.v.y) - top.v.y;
+		double yPreStep = int(top.v.y) - top.v.y;
 		double xPreStep = yPreStep * topToMidXStep;
 
 		double leftX = top.v.x + (yPreStep * topToMidXStep);
@@ -335,9 +335,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		double texCoordYNextLineRight = textureYYStep + (textureYXStep * topToBotXStep);
 
 		//draw scanlines from top.y to mid.y
-		for (int y = (int)floor(top.v.y); y > (int)floor(mid.v.y); y--) {
+		for (int y = (int)(top.v.y); y > (int)(mid.v.y); y--) {
 
-			double xPreStep = ceil(leftX) - leftX;
+			double xPreStep = int(leftX + 1.0) - leftX;
 			double xdist = rightX - leftX;
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
@@ -349,7 +349,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
 			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
-			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
+			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
 				double texX = textureCoordX * z;
@@ -395,7 +395,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		
 		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
 
-		yPreStep = floor(mid.v.y) - mid.v.y;
+		yPreStep = int(mid.v.y) - mid.v.y;
 		xPreStep = yPreStep * midToBotXStep;
 
 		leftX = mid.v.x + (yPreStep * midToBotXStep);
@@ -415,9 +415,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		texCoordStartYLeft = mid.t.y * (1.0 / mid.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
 		texCoordYNextLineLeft = textureYYStep + (textureYXStep * midToBotXStep);
 
-		for (int y = (int)floor(mid.v.y); y > (int)floor(bot.v.y); y--) {
+		for (int y = (int)(mid.v.y); y > (int)(bot.v.y); y--) {
 
-			double xPreStep = ceil(leftX) - leftX;
+			double xPreStep = int(leftX + 1.0) - leftX;
 			double xdist = rightX - leftX;
 			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
@@ -429,7 +429,7 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
 			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
-			for (int x = (int)floor(leftX); x < (int)floor(rightX); x++) {
+			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
 				double texX = textureCoordX * z;

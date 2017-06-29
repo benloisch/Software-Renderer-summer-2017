@@ -252,10 +252,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		static double rot = 0;
 		rot += delta;
 
-		mesh.modelMesh.setYrot(rot * 10);
+		mesh.modelMesh.setYrot(rot * 0);
 		mesh.modelMesh.setTranslate(0, 0, 3);
 
-		mesh2.modelMesh.setYrot(rot * 10);
+		mesh2.modelMesh.setYrot(rot * 0);
 		mesh2.modelMesh.setTranslate(0, 0, 6);
 
 		win32WindowBuffer.FillBufferColor(0, 0, 0);
