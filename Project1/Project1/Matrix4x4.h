@@ -7,7 +7,7 @@ class Matrix4x4
 {
 public:
 
-	double m[4][4];
+	float m[4][4];
 
 	Matrix4x4();
 	Matrix4x4(const Matrix4x4& matrix);
@@ -15,23 +15,23 @@ public:
 
 	Matrix4x4& operator=(const Matrix4x4 &matrix);
 	Matrix4x4 operator*(const Matrix4x4 &inMat);
-	Matrix4x4 operator*(const double inScalar);
+	Matrix4x4 operator*(const float inScalar);
 	Matrix4x4 operator+(const Matrix4x4 &inMat);
 	Matrix4x4 operator-(const Matrix4x4 &inMat);
 
-	void setRow1(double x, double y, double z, double w);
-	void setRow2(double x, double y, double z, double w);
-	void setRow3(double x, double y, double z, double w);
-	void setRow4(double x, double y, double z, double w);
+	void setRow1(float x, float y, float z, float w);
+	void setRow2(float x, float y, float z, float w);
+	void setRow3(float x, float y, float z, float w);
+	void setRow4(float x, float y, float z, float w);
 
-	double det3x3(double, double, double, double, double, double, double, double, double);
-	void setXrot(double);//in degrees
-	void setYrot(double);
-	void setZrot(double);
+	float det3x3(float, float, float, float, float, float, float, float, float);
+	void setXrot(float);//in degrees
+	void setYrot(float);
+	void setZrot(float);
 
-	void setScale(double, double, double);
-	void setTranslate(double, double, double);
-	void setRotArb(double, double, double, double);
+	void setScale(float, float, float);
+	void setTranslate(float, float, float);
+	void setRotArb(float, float, float, float);
 
 	void setTranspose();
 	Matrix4x4 tranpose();
@@ -89,7 +89,7 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4 &inMat)
 }
 
 inline
-Matrix4x4 Matrix4x4::operator*(const double inScalar)
+Matrix4x4 Matrix4x4::operator*(const float inScalar)
 {
 	Matrix4x4 result;
 
@@ -137,7 +137,7 @@ Matrix4x4 Matrix4x4::operator-(const Matrix4x4 &inMat)
 }
 
 inline
-void Matrix4x4::setRow1(double x, double y, double z, double w)
+void Matrix4x4::setRow1(float x, float y, float z, float w)
 {
 	this->m[0][0] = x;
 	this->m[0][1] = y;
@@ -146,7 +146,7 @@ void Matrix4x4::setRow1(double x, double y, double z, double w)
 }
 
 inline
-void Matrix4x4::setRow2(double x, double y, double z, double w)
+void Matrix4x4::setRow2(float x, float y, float z, float w)
 {
 	this->m[1][0] = x;
 	this->m[1][1] = y;
@@ -155,7 +155,7 @@ void Matrix4x4::setRow2(double x, double y, double z, double w)
 }
 
 inline
-void Matrix4x4::setRow3(double x, double y, double z, double w)
+void Matrix4x4::setRow3(float x, float y, float z, float w)
 {
 	this->m[2][0] = x;
 	this->m[2][1] = y;
@@ -164,7 +164,7 @@ void Matrix4x4::setRow3(double x, double y, double z, double w)
 }
 
 inline
-void Matrix4x4::setRow4(double x, double y, double z, double w)
+void Matrix4x4::setRow4(float x, float y, float z, float w)
 {
 	this->m[3][0] = x;
 	this->m[3][1] = y;
@@ -203,7 +203,7 @@ Matrix4x4 Matrix4x4::tranpose()
 }
 
 inline
-double Matrix4x4::det3x3(double m11, double m12, double m13, double m21, double m22, double m23, double m31, double m32, double m33)
+float Matrix4x4::det3x3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
 {
 	return (m11 * m22 * m33) + (m12 * m23 * m31) + (m13 * m21 * m32) - (m13 * m22 * m31) - (m12 * m21 * m33) - (m11 * m23 * m32);
 }
@@ -211,30 +211,30 @@ double Matrix4x4::det3x3(double m11, double m12, double m13, double m21, double 
 inline
 void Matrix4x4::setInverse()
 {
-	double det4x4 = (m[0][0] * det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]))
+	float det4x4 = (m[0][0] * det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]))
 		- (m[0][1] * det3x3(m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]))
 		+ (m[0][2] * det3x3(m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]))
 		- (m[0][3] * det3x3(m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]));
 
-	double tm11 = det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
-	double tm12 = -det3x3(m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
-	double tm13 = det3x3(m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
-	double tm14 = -det3x3(m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
+	float tm11 = det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
+	float tm12 = -det3x3(m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
+	float tm13 = det3x3(m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
+	float tm14 = -det3x3(m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
 
-	double tm21 = -det3x3(m[0][1], m[0][2], m[0][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
-	double tm22 = det3x3(m[0][0], m[0][2], m[0][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
-	double tm23 = -det3x3(m[0][0], m[0][1], m[0][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
-	double tm24 = det3x3(m[0][0], m[0][1], m[0][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
+	float tm21 = -det3x3(m[0][1], m[0][2], m[0][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
+	float tm22 = det3x3(m[0][0], m[0][2], m[0][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
+	float tm23 = -det3x3(m[0][0], m[0][1], m[0][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
+	float tm24 = det3x3(m[0][0], m[0][1], m[0][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
 
-	double tm31 = det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[3][1], m[3][2], m[3][3]);
-	double tm32 = -det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[3][0], m[3][2], m[3][3]);
-	double tm33 = det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[3][0], m[3][1], m[3][3]);
-	double tm34 = -det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[3][0], m[3][1], m[3][2]);
+	float tm31 = det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[3][1], m[3][2], m[3][3]);
+	float tm32 = -det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[3][0], m[3][2], m[3][3]);
+	float tm33 = det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[3][0], m[3][1], m[3][3]);
+	float tm34 = -det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[3][0], m[3][1], m[3][2]);
 
-	double tm41 = -det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3]);
-	double tm42 = det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3]);
-	double tm43 = -det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3]);
-	double tm44 = det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2]);
+	float tm41 = -det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3]);
+	float tm42 = det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3]);
+	float tm43 = -det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3]);
+	float tm44 = det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2]);
 
 	m[0][0] = tm11 / det4x4;
 	m[0][1] = tm21 / det4x4;
@@ -262,30 +262,30 @@ Matrix4x4 Matrix4x4::inverse()
 {
 	Matrix4x4 result;
 
-	double det4x4 = (m[0][0] * det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]))
+	float det4x4 = (m[0][0] * det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]))
 		- (m[0][1] * det3x3(m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]))
 		+ (m[0][2] * det3x3(m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]))
 		- (m[0][3] * det3x3(m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]));
 
-	double tm11 = det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
-	double tm12 = -det3x3(m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
-	double tm13 = det3x3(m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
-	double tm14 = -det3x3(m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
+	float tm11 = det3x3(m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
+	float tm12 = -det3x3(m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
+	float tm13 = det3x3(m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
+	float tm14 = -det3x3(m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
 
-	double tm21 = -det3x3(m[0][1], m[0][2], m[0][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
-	double tm22 = det3x3(m[0][0], m[0][2], m[0][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
-	double tm23 = -det3x3(m[0][0], m[0][1], m[0][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
-	double tm24 = det3x3(m[0][0], m[0][1], m[0][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
+	float tm21 = -det3x3(m[0][1], m[0][2], m[0][3], m[2][1], m[2][2], m[2][3], m[3][1], m[3][2], m[3][3]);
+	float tm22 = det3x3(m[0][0], m[0][2], m[0][3], m[2][0], m[2][2], m[2][3], m[3][0], m[3][2], m[3][3]);
+	float tm23 = -det3x3(m[0][0], m[0][1], m[0][3], m[2][0], m[2][1], m[2][3], m[3][0], m[3][1], m[3][3]);
+	float tm24 = det3x3(m[0][0], m[0][1], m[0][2], m[2][0], m[2][1], m[2][2], m[3][0], m[3][1], m[3][2]);
 
-	double tm31 = det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[3][1], m[3][2], m[3][3]);
-	double tm32 = -det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[3][0], m[3][2], m[3][3]);
-	double tm33 = det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[3][0], m[3][1], m[3][3]);
-	double tm34 = -det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[3][0], m[3][1], m[3][2]);
+	float tm31 = det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[3][1], m[3][2], m[3][3]);
+	float tm32 = -det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[3][0], m[3][2], m[3][3]);
+	float tm33 = det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[3][0], m[3][1], m[3][3]);
+	float tm34 = -det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[3][0], m[3][1], m[3][2]);
 
-	double tm41 = -det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3]);
-	double tm42 = det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3]);
-	double tm43 = -det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3]);
-	double tm44 = det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2]);
+	float tm41 = -det3x3(m[0][1], m[0][2], m[0][3], m[1][1], m[1][2], m[1][3], m[2][1], m[2][2], m[2][3]);
+	float tm42 = det3x3(m[0][0], m[0][2], m[0][3], m[1][0], m[1][2], m[1][3], m[2][0], m[2][2], m[2][3]);
+	float tm43 = -det3x3(m[0][0], m[0][1], m[0][3], m[1][0], m[1][1], m[1][3], m[2][0], m[2][1], m[2][3]);
+	float tm44 = det3x3(m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2]);
 
 	result.m[0][0] = tm11 / det4x4;
 	result.m[0][1] = tm21 / det4x4;
@@ -311,9 +311,9 @@ Matrix4x4 Matrix4x4::inverse()
 }
 
 inline
-void Matrix4x4::setXrot(double inRot)
+void Matrix4x4::setXrot(float inRot)
 {
-	inRot = (inRot * 3.1415926535) / 180.0;
+	inRot = (inRot * 3.1415926535f) / 180.0f;
 
 	m[1][1] = cos(inRot);
 	m[1][2] = sin(inRot);
@@ -322,9 +322,9 @@ void Matrix4x4::setXrot(double inRot)
 }
 
 inline
-void Matrix4x4::setYrot(double inRot)
+void Matrix4x4::setYrot(float inRot)
 {
-	inRot = (inRot * 3.1415926535) / 180.0;
+	inRot = (inRot * 3.1415926535f) / 180.0f;
 
 	m[0][0] = cos(inRot);
 	m[2][0] = sin(inRot);
@@ -333,9 +333,9 @@ void Matrix4x4::setYrot(double inRot)
 }
 
 inline
-void Matrix4x4::setZrot(double inRot)
+void Matrix4x4::setZrot(float inRot)
 {
-	inRot = (inRot * 3.1415926535) / 180.0;
+	inRot = (inRot * 3.1415926535f) / 180.0f;
 
 	m[0][0] = cos(inRot);
 	m[1][0] = -sin(inRot);
@@ -344,7 +344,7 @@ void Matrix4x4::setZrot(double inRot)
 }
 
 inline
-void Matrix4x4::setScale(double inX, double inY, double inZ)
+void Matrix4x4::setScale(float inX, float inY, float inZ)
 {
 	m[0][0] = inX;
 	m[1][1] = inY;
@@ -352,7 +352,7 @@ void Matrix4x4::setScale(double inX, double inY, double inZ)
 }
 
 inline
-void Matrix4x4::setTranslate(double inX, double inY, double inZ)
+void Matrix4x4::setTranslate(float inX, float inY, float inZ)
 {
 	m[3][0] = inX;
 	m[3][1] = inY;
@@ -373,19 +373,19 @@ void Matrix4x4::setIdentity()
 }
 
 inline
-void Matrix4x4::setRotArb(double nx, double ny, double nz, double inRot)
+void Matrix4x4::setRotArb(float nx, float ny, float nz, float inRot)
 {
-	inRot = (inRot * 3.1415926535) / 180.0;
+	inRot = (inRot * 3.1415926535f) / 180.0f;
 
-	m[0][0] = nx * nx * (1.0 - cos(inRot)) + cos(inRot);
-	m[0][1] = nx * ny * (1.0 - cos(inRot)) + (nz * sin(inRot));
-	m[0][2] = nx * nz * (1.0 - cos(inRot)) - (ny * sin(inRot));
-	m[1][0] = nx * ny * (1.0 - cos(inRot)) - (nz * sin(inRot));
-	m[1][1] = ny * ny * (1.0 - cos(inRot)) + cos(inRot);
-	m[1][2] = ny * nz * (1.0 - cos(inRot)) + (nx * sin(inRot));
-	m[2][0] = nx * nz * (1.0 - cos(inRot)) + (ny * sin(inRot));
-	m[2][1] = ny * nz * (1.0 - cos(inRot)) - (nx * sin(inRot));
-	m[2][2] = nz * nz * (1.0 - cos(inRot)) + cos(inRot);
+	m[0][0] = nx * nx * (1.0f - cos(inRot)) + cos(inRot);
+	m[0][1] = nx * ny * (1.0f - cos(inRot)) + (nz * sin(inRot));
+	m[0][2] = nx * nz * (1.0f - cos(inRot)) - (ny * sin(inRot));
+	m[1][0] = nx * ny * (1.0f - cos(inRot)) - (nz * sin(inRot));
+	m[1][1] = ny * ny * (1.0f - cos(inRot)) + cos(inRot);
+	m[1][2] = ny * nz * (1.0f - cos(inRot)) + (nx * sin(inRot));
+	m[2][0] = nx * nz * (1.0f - cos(inRot)) + (ny * sin(inRot));
+	m[2][1] = ny * nz * (1.0f - cos(inRot)) - (nx * sin(inRot));
+	m[2][2] = nz * nz * (1.0f - cos(inRot)) + cos(inRot);
 }
 
 inline
@@ -395,7 +395,7 @@ void Matrix4x4::zeroOutElements()
 	for (int c = 0; c < 4; c++)
 	{
 		if (m[r][c] < 0.00000001 || m[r][c] < -0.00000001)
-			m[r][c] = 0.0;
+			m[r][c] = 0.0f;
 	}
 }
 

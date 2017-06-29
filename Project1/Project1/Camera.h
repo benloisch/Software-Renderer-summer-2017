@@ -15,31 +15,31 @@ public:
 	Vector4D originPosition;
 	Vector4D lookDirection;
 
-	double nearPlane;
-	double farPlane;
-	double aspectRatio;
-	double fieldOfView;
+	float nearPlane;
+	float farPlane;
+	float aspectRatio;
+	float fieldOfView;
 
-	double width;
-	double height;
+	int width;
+	int height;
 
 	POINT sMouse;
-	double movX, movZ;
+	float movX, movZ;
 
 	Camera();
 
-	void setOriginPosition(double, double, double);
-	void setLookDirection(double, double, double);
-	void setNearPlane(double);
-	void setFarPlane(double);
-	void setAspectRatio(double, double);
-	void setFieldOfView(double);
+	void setOriginPosition(float, float, float);
+	void setLookDirection(float, float, float);
+	void setNearPlane(float);
+	void setFarPlane(float);
+	void setAspectRatio(int, int);
+	void setFieldOfView(int);
 
 	void calculateViewMatrix();
 	void calculateProjectionMatrix();
-	void updateCameraOrientation(double, double);
+	void updateCameraOrientation(float, float);
 
-	void getInput(double &delta);
+	void getInput(float &delta);
 
 private:
 
@@ -53,7 +53,7 @@ inline void Camera::calculateViewMatrix() {
 	//Cz = AxBy - AyBx
 
 	//calculate x basis vector by taking cross product of world 'up' (0, 1, 0) vector and lookDirection vector
-	Vector4D up(0.0, 1.0, 0.0, 0.0);
+	Vector4D up(0.0f, 1.0f, 0.0f, 0.0f);
 	Vector4D xBasis = up ^ lookDirection;
 
 	//calculate y basis vector by taking cross product of lookDirection and x basis vector
@@ -66,9 +66,9 @@ inline void Camera::calculateViewMatrix() {
 	yBasis.normalize();
 	zBasis.normalize();
 
-	viewMatrix.setRow1(xBasis.x, xBasis.y, xBasis.z, 0.0);
-	viewMatrix.setRow2(yBasis.x, yBasis.y, yBasis.z, 0.0);
-	viewMatrix.setRow3(zBasis.x, zBasis.y, zBasis.z, 0.0);
+	viewMatrix.setRow1(xBasis.x, xBasis.y, xBasis.z, 0.0f);
+	viewMatrix.setRow2(yBasis.x, yBasis.y, yBasis.z, 0.0f);
+	viewMatrix.setRow3(zBasis.x, zBasis.y, zBasis.z, 0.0f);
 
 	Vector4D trans;
 	trans += (xBasis * movX);
@@ -99,19 +99,19 @@ inline void Camera::calculateProjectionMatrix() {
 	w = z
 	*/
 
-	double oneOverAspect = 1.0 / aspectRatio;
-	if (aspectRatio < 1.0)
-		projectionMatrix.m[0][0] = 1.0 / aspectRatio * tan(fieldOfView / 2.0);
+	float oneOverAspect = 1.0f / aspectRatio;
+	if (aspectRatio < 1.0f)
+		projectionMatrix.m[0][0] = 1.0f / aspectRatio * tan(fieldOfView / 2.0f);
 	else
-	projectionMatrix.m[0][0] = 1.0 / oneOverAspect * tan(fieldOfView / 2.0);
-	projectionMatrix.m[1][1] = 1.0 / tan(fieldOfView / 2.0);
+	projectionMatrix.m[0][0] = 1.0f / oneOverAspect * tan(fieldOfView / 2.0f);
+	projectionMatrix.m[1][1] = 1.0f / tan(fieldOfView / 2.0f);
 	projectionMatrix.m[2][2] = farPlane / (farPlane - nearPlane);
-	projectionMatrix.m[2][3] = 1.0;
+	projectionMatrix.m[2][3] = 1.0f;
 	projectionMatrix.m[3][2] = -nearPlane * farPlane / (farPlane - nearPlane);
-	projectionMatrix.m[3][3] = 0.0;
+	projectionMatrix.m[3][3] = 0.0f;
 }
 
-inline void Camera::getInput(double &delta)
+inline void Camera::getInput(float &delta)
 {
 	Matrix4x4 rot;
 	sMouse;
@@ -121,34 +121,34 @@ inline void Camera::getInput(double &delta)
 
 	if (GetAsyncKeyState(0x57)) //W
 	{
-		movZ = 10.1 * delta;
+		movZ = 10.1f * delta;
 	}
 	else if (GetAsyncKeyState(0x53)) //S
 	{
-		movZ = -10.1 * delta;
+		movZ = -10.1f * delta;
 	}
 
 	if (GetAsyncKeyState(0x41)) //A
 	{
-		movX = -10.1 * delta;
+		movX = -10.1f * delta;
 	}
 	else if (GetAsyncKeyState(0x44)) //D
 	{
-		movX = 10.1 * delta;
+		movX = 10.1f * delta;
 	}
 
 	if (mouseNow.x - sMouse.x > 0)
 	{
-		double diff = mouseNow.x - sMouse.x;
-		diff *= 10.1 * delta;
+		float diff = float(mouseNow.x - sMouse.x);
+		diff *= 10.1f * delta;
 		rot.setYrot(diff);
 		lookDirection *= rot;
 		lookDirection.normalize();
 	}
 	else if (mouseNow.x - sMouse.x < 0)
 	{
-		double diff = mouseNow.x - sMouse.x;
-		diff *= 10.1 * delta;
+		float diff = float(mouseNow.x - sMouse.x);
+		diff *= 10.1f * delta;
 		rot.setYrot(diff);
 		lookDirection *= rot;
 		lookDirection.normalize();
@@ -157,8 +157,8 @@ inline void Camera::getInput(double &delta)
 	if (mouseNow.y - sMouse.y > 0)
 	{
 		if (lookDirection.y > -0.9) {
-			double diff = mouseNow.y - sMouse.y;
-			diff *= 10.1 * delta;
+			float diff = float(mouseNow.y - sMouse.y);
+			diff *= 10.1f * delta;
 			rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
 			lookDirection *= rot;
 			lookDirection.normalize();
@@ -167,8 +167,8 @@ inline void Camera::getInput(double &delta)
 	else if (mouseNow.y - sMouse.y < 0)
 	{
 		if (lookDirection.y < 0.9) {
-			double diff = mouseNow.y - sMouse.y;
-			diff *= 10.1 * delta;
+			float diff = float(mouseNow.y - sMouse.y);
+			diff *= 10.1f * delta;
 			rot.setRotArb(viewMatrix.m[0][0], viewMatrix.m[0][1], viewMatrix.m[0][2], diff); //rotate forward vector about x axis
 			lookDirection *= rot;
 			lookDirection.normalize();

@@ -23,8 +23,11 @@ void Pipeline::transform(Mesh *inputMesh) {
 		projectVerticies(&verticies[0], MVP);
 		
 		//clip and add extra verticies in clockwise order
-		clipVerticies(&verticies[0]);
+		vector<Vertex> copy = clipVerticies(verticies);
 		
+		if (copy.size() > 0)
+			verticies = copy;
+
 		for (unsigned int i = 0; i < verticies.size() - 2; i++)
 			shadeTriangle(&verticies[i], &verticies[i].t, &verticies[i].n);
 	}
