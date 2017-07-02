@@ -131,10 +131,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	*/
 
 	mesh.texture = new ImageBMP;
-	mesh.texture->loadBMP("checkerboard");
+	mesh.texture->loadBMP("smiley");
 
 	mesh2.texture = new ImageBMP;
-	mesh2.texture->loadBMP("checkerboard");
+	mesh2.texture->loadBMP("smiley");
 	//***********************************************************Old StarField3D code
 	/*
 	//Vertex stars[100000];
