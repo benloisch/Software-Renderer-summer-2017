@@ -27,7 +27,7 @@ public:
 
 	void transform(Mesh *inputMesh);
 	inline void projectVerticies(Vertex verticies[3], Matrix4x4 &MVP);
-	inline vector<Vertex> clipVerticies(vector<Vertex> &verticies);
+	inline vector<Vertex> clipVerticies(Vertex verticies[]);
 	inline void shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], Vector4D normals[3]);
 	inline void sortVerticies(Vertex verticies[3]);
 
@@ -63,10 +63,10 @@ inline void Pipeline::projectVerticies(Vertex verticies[3], Matrix4x4 &MVP) {
 	verticies[2].v *= MVP;
 }
 
-inline vector<Vertex> Pipeline::clipVerticies(vector<Vertex> &verticies) {
+inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 	//check if entire triangle lies outside viewing frustum
 	//clip in homogenous clip space
-	vector<Vertex> copy;
+	vector<Vertex> output;
 
 	//clip x, y, and z against -w and w
 	//t = (currentW - currentP)  / *(currentW - currentP) - (nextW - nextP))
@@ -77,23 +77,21 @@ inline vector<Vertex> Pipeline::clipVerticies(vector<Vertex> &verticies) {
 	for (int i = 0; i < 3; i++) {
 
 		if (current.v.x < current.v.w) //if current vertex is inside, add to list
-			copy.push_back(current);
+			output.push_back(current);
 		//check if one is inside and one is outside and if so, clip and add to copy
 		if ((current.v.x < current.v.w && next.v.x >= next.v.w) || (current.v.x >= current.v.w && next.v.x < next.v.w)) {
 			float t = (current.v.w - current.v.x) / ((current.v.w - current.v.x) - (next.v.w - next.v.x));
 			Vertex v = current;
 			v.v = v.v.lerp(next.v, t);
 			v.t = v.t.lerp(next.t, t);
-			copy.push_back(v);
+			output.push_back(v);
 		}
 
-		if (i != 2) {
-			current = verticies[i];
-			next = verticies[i + 1];
-		}
+		current = verticies[i];
+		next = verticies[i + 1];
 	}
 
-	return copy;
+	return output;
 }
 
 inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], Vector4D normals[3]) {
