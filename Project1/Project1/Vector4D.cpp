@@ -5,7 +5,7 @@ Vector4D::Vector4D()
 	this->x = this->y = this->z = 0.0;
 }
 
-Vector4D::Vector4D(double x, double y, double z, double w)
+Vector4D::Vector4D(float x, float y, float z, float w)
 {
 	this->x = x;
 	this->y = y;
@@ -15,10 +15,10 @@ Vector4D::Vector4D(double x, double y, double z, double w)
 
 Vector4D::Vector4D(int x, int y, int z, int w)
 {
-	this->x = double(x);
-	this->y = double(y);
-	this->z = double(z);
-	this->w = double(w);
+	this->x = float(x);
+	this->y = float(y);
+	this->z = float(z);
+	this->w = float(w);
 }
 
 Vector4D::Vector4D(const Vector4D &vector)

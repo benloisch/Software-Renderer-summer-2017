@@ -27,12 +27,12 @@ public:
 
 	void transform(Mesh *inputMesh);
 	inline void projectVerticies(Vertex verticies[3], Matrix4x4 &MVP);
-	inline void clipVerticies(Vertex verticies[3]);
-	inline void shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], Vector4D normals[3]);
-	inline void sortVerticies(Vertex verticies[3]);
+	inline vector<Vertex> clipVerticies(Vertex verticies[]);
+	inline void shadeTriangle(Vertex top, Vertex mid, Vertex bot);
+	inline void sortVerticies(Vertex &top, Vertex &mid, Vertex &bot);
 
-	inline double gradientDcDx(double c0, double c1, double c2, Vertex verticies[3]);
-	inline double gradientDcDy(double c0, double c1, double c2, Vertex verticies[3]);
+	inline float gradientDcDx(float c0, float c1, float c2, Vertex &top, Vertex &mid, Vertex &bot);
+	inline float gradientDcDy(float c0, float c1, float c2, Vertex &top, Vertex &mid, Vertex &bot);
 
 private:
 
@@ -43,7 +43,7 @@ private:
 };
 
 inline void Pipeline::clearDepthBuffer() {
-	for (int i = 0; i < (int)cam->width*cam->height; i++) {
+	for (int i = 0; i < cam->width*cam->height; i++) {
 		depthBuffer[i] = FLT_MAX;
 	}
 }
@@ -63,40 +63,231 @@ inline void Pipeline::projectVerticies(Vertex verticies[3], Matrix4x4 &MVP) {
 	verticies[2].v *= MVP;
 }
 
-inline void Pipeline::clipVerticies(Vertex verticies[3]) {
+inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 	//check if entire triangle lies outside viewing frustum
 	//clip in homogenous clip space
+	vector<Vertex> output;
+
+	//clip x, y, and z against -w and w
+	//t = (currentW - currentP)  / *(currentW - currentP) - (nextW - nextP))
+
+	Vertex current = verticies[2];
+	Vertex next = verticies[0];
+
+	for (unsigned int i = 0; i < 3; i++) {
+
+		if (current.v.x < current.v.w) //if current vertex is inside, add to list
+			output.push_back(current);
+		//check if one is inside and one is outside and if so, clip and add to copy
+		if ((current.v.x < current.v.w && next.v.x > next.v.w) || (current.v.x > current.v.w && next.v.x < next.v.w)) {
+			float t = (current.v.w - current.v.x) / ((current.v.w - current.v.x) - (next.v.w - next.v.x));
+			Vertex v = current;
+			v.v = v.v.lerp(next.v, t);
+			v.t = v.t.lerp(next.t, t);
+			v.v.x = v.v.w;
+			//v.v.x -= 0.0001f;
+			output.push_back(v);
+		}
+
+		if (i != 2) {
+			current = verticies[i];
+			next = verticies[i + 1];
+		}
+	}
+
+	vector<Vertex> input;
+	if (output.size() != 0)
+		input = output;
+	else
+		return output;
+
+	output.clear();
+
+	current = input[input.size() - 1];
+	next = input[0];
+
+	for (unsigned int i = 0; i < input.size(); i++) {
+
+		if (current.v.x > -current.v.w) //if current vertex is inside, add to list
+			output.push_back(current);
+		//check if one is inside and one is outside and if so, clip and add to copy
+		if ((current.v.x > -current.v.w && next.v.x < -next.v.w) || (current.v.x < -current.v.w && next.v.x > -next.v.w)) {
+			float t = (-current.v.w - current.v.x) / ((-current.v.w - current.v.x) - (-next.v.w - next.v.x));
+			Vertex v = current;
+			v.v = v.v.lerp(next.v, t);
+			v.t = v.t.lerp(next.t, t);
+			v.v.x = -v.v.w;
+			//v.v.x += 0.0001f;
+			output.push_back(v);
+		}
+
+		if (i != input.size() - 1){
+			current = input[i];
+			next = input[i + 1];
+		}
+	}
+	
+	if (output.size() != 0)
+		input = output;
+	else
+		return output;
+
+	output.clear();
+
+	current = input[input.size() - 1];
+	next = input[0];
+
+	for (unsigned int i = 0; i < input.size(); i++) {
+
+		if (current.v.y < current.v.w) //if current vertex is inside, add to list
+			output.push_back(current);
+		//check if one is inside and one is outside and if so, clip and add to copy
+		if ((current.v.y < current.v.w && next.v.y > next.v.w) || (current.v.y > current.v.w && next.v.y < next.v.w)) {
+			float t = (current.v.w - current.v.y) / ((current.v.w - current.v.y) - (next.v.w - next.v.y));
+			Vertex v = current;
+			v.v = v.v.lerp(next.v, t);
+			v.t = v.t.lerp(next.t, t);
+			v.v.y = v.v.w;
+			//v.v.y -= 0.0001f;
+			output.push_back(v);
+		}
+
+		if (i != input.size() - 1){
+			current = input[i];
+			next = input[i + 1];
+		}
+	}
+	
+	if (output.size() != 0)
+		input = output;
+	else
+		return output;
+
+	output.clear();
+
+	current = input[input.size() - 1];
+	next = input[0];
+
+	for (unsigned int i = 0; i < input.size(); i++) {
+
+		if (current.v.y > -current.v.w) //if current vertex is inside, add to list
+			output.push_back(current);
+		//check if one is inside and one is outside and if so, clip and add to copy
+		//if ((current.v.y > -current.v.w && next.v.y <= -next.v.w) || (current.v.y < -current.v.w && next.v.x >= -next.v.w)) { //breaks
+		if ((current.v.y > -current.v.w && next.v.y < -next.v.w) || (current.v.y < -current.v.w && next.v.x > -next.v.w)) { //does not break
+			float t = (-current.v.w - current.v.y) / ((-current.v.w - current.v.y) - (-next.v.w - next.v.y));
+			Vertex v = current;
+			v.v = v.v.lerp(next.v, t);
+			v.t = v.t.lerp(next.t, t);
+			v.v.y = -v.v.w;
+			//v.v.y += 0.0001f;
+			output.push_back(v);
+		}
+
+		if (i != input.size() - 1){
+			current = input[i];
+			next = input[i + 1];
+		}
+	}
+
+	if (output.size() != 0)
+		input = output;
+	else
+		return output;
+
+	output.clear();
+
+	current = input[input.size() - 1];
+	next = input[0];
+
+	for (unsigned int i = 0; i < input.size(); i++) {
+
+		if (current.v.z < current.v.w) //if current vertex is inside, add to list
+			output.push_back(current);
+		//check if one is inside and one is outside and if so, clip and add to copy
+		if ((current.v.z < current.v.w && next.v.z > next.v.w) || (current.v.z > current.v.w && next.v.z < next.v.w)) {
+			float t = (current.v.w - current.v.z) / ((current.v.w - current.v.z) - (next.v.w - next.v.z));
+			Vertex v = current;
+			v.v = v.v.lerp(next.v, t);
+			v.t = v.t.lerp(next.t, t);
+			v.v.z = v.v.w;
+			//v.v.z -= 0.0001f;
+			output.push_back(v);
+		}
+
+		if (i != input.size() - 1){
+			current = input[i];
+			next = input[i + 1];
+		}
+	}
+
+	if (output.size() != 0)
+		input = output;
+	else
+		return output;
+
+	output.clear();
+
+	current = input[input.size() - 1];
+	next = input[0];
+
+	for (unsigned int i = 0; i < input.size(); i++) {
+
+		if (current.v.z > 0) //if current vertex is inside, add to list
+			output.push_back(current);
+		//check if one is inside and one is outside and if so, clip and add to copy
+		if ((current.v.z > 0 && next.v.z < 0) || (current.v.z < 0 && next.v.z > 0)) {
+			float t = (0 - current.v.z) / ((0 - current.v.z) - (0 - next.v.z));
+			Vertex v = current;
+			v.v = v.v.lerp(next.v, t);
+			v.t = v.t.lerp(next.t, t);
+			v.v.z = 0.0f;
+			//v.v.z += 0.0001f;
+			output.push_back(v);
+		}
+
+		if (i != input.size() - 1){
+			current = input[i];
+			next = input[i + 1];
+		}
+	}
+	
+	return output;
 }
 
-inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], Vector4D normals[3]) {
+inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 
 	//project from homogenous clip space to NDC space
-	verticies[0].v /= verticies[0].v.w;
-	verticies[1].v /= verticies[1].v.w;
-	verticies[2].v /= verticies[2].v.w;
+	top.v /= top.v.w;
+	mid.v /= mid.v.w;
+	bot.v /= bot.v.w;
 
 	//perform z-culling
-	if (((verticies[1].v - verticies[0].v) ^
-		(verticies[2].v - verticies[0].v)).z > 0) {
+	if (((mid.v - top.v) ^
+		(bot.v - top.v)).z > 0) {
 		//return;
 	}
 
-	sortVerticies(verticies);
+	sortVerticies(top, mid, bot);
 
 	//this clipping will take place in the clipVerticies() function
-	for (int i = 0; i < 3; i++) {
-		if (verticies[i].v.x <= -1.0 || verticies[i].v.x >= 1.0 || verticies[i].v.y <= -1.0 || verticies[i].v.y >= 1.0 || verticies[i].v.z <= 0 || verticies[i].v.z >= 1)
-			return;
-	}
+	if (top.v.x < -1.0 || top.v.x > 1.0 || top.v.y < -1.0 || top.v.y > 1.0 || top.v.z < 0 || top.v.z > 1)
+		return;
+	if (mid.v.x < -1.0 || mid.v.x > 1.0 || mid.v.y < -1.0 || mid.v.y > 1.0 || mid.v.z < 0 || mid.v.z > 1)
+		return;
+	if (bot.v.x < -1.0 || bot.v.x > 1.0 || bot.v.y < -1.0 || bot.v.y > 1.0 || bot.v.z < 0 || bot.v.z > 1)
+		return;
 
-	for (int i = 0; i < 3; i++) {
-		verticies[i].v.x = ((verticies[i].v.x + 1.0) * 0.5 * cam->width);
-		verticies[i].v.y = ((verticies[i].v.y + 1.0) * 0.5 * cam->height);
-	}
+	top.v.x = ((top.v.x + 1.0f) * 0.5f * cam->width);
+	top.v.y = ((top.v.y + 1.0f) * 0.5f * cam->height);
+	mid.v.x = ((mid.v.x + 1.0f) * 0.5f * cam->width);
+	mid.v.y = ((mid.v.y + 1.0f) * 0.5f * cam->height);
+	bot.v.x = ((bot.v.x + 1.0f) * 0.5f * cam->width);
+	bot.v.y = ((bot.v.y + 1.0f) * 0.5f * cam->height);
 
-	Vertex top = verticies[0];
-	Vertex mid = verticies[1];
-	Vertex bot = verticies[2];
+	//Vertex top = verticies[0];
+	//Vertex mid = verticies[1];
+	//Vertex bot = verticies[2];
 
 	//top.v.x = ((top.v.x + 1.0) * 0.5 * cam->width);
 	//top.v.y = ((top.v.y + 1.0) * 0.5 * cam->height);
@@ -106,98 +297,99 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 	//bot.v.y = ((bot.v.y + 1.0) * 0.5 * cam->height);		
 
 	//in full 1 unit steps
-	double textureXXStep = gradientDcDx(top.t.x * (1.0 / top.v.w), mid.t.x * (1.0 / mid.v.w), bot.t.x * (1.0 / bot.v.w), verticies);
-	double textureXYStep = gradientDcDy(top.t.x * (1.0 / top.v.w), mid.t.x * (1.0 / mid.v.w), bot.t.x * (1.0 / bot.v.w), verticies);
-	double textureYXStep = gradientDcDx(top.t.y * (1.0 / top.v.w), mid.t.y * (1.0 / mid.v.w), bot.t.y * (1.0 / bot.v.w), verticies);
-	double textureYYStep = gradientDcDy(top.t.y * (1.0 / top.v.w), mid.t.y * (1.0 / mid.v.w), bot.t.y * (1.0 / bot.v.w), verticies);
+	float textureXXStep = gradientDcDx(top.t.x * (1.0f / top.v.w), mid.t.x * (1.0f / mid.v.w), bot.t.x * (1.0f / bot.v.w), top, mid, bot);
+	float textureXYStep = gradientDcDy(top.t.x * (1.0f / top.v.w), mid.t.x * (1.0f / mid.v.w), bot.t.x * (1.0f / bot.v.w), top, mid, bot);
+	float textureYXStep = gradientDcDx(top.t.y * (1.0f / top.v.w), mid.t.y * (1.0f / mid.v.w), bot.t.y * (1.0f / bot.v.w), top, mid, bot);
+	float textureYYStep = gradientDcDy(top.t.y * (1.0f / top.v.w), mid.t.y * (1.0f / mid.v.w), bot.t.y * (1.0f / bot.v.w), top, mid, bot);
 
-	double inverseZXStep = gradientDcDx(1.0 / top.v.w, 1.0 / mid.v.w, 1.0 / bot.v.w, verticies);
-	double inverseZYStep = gradientDcDy(1.0 / top.v.w, 1.0 / mid.v.w, 1.0 / bot.v.w, verticies);
+	float inverseZXStep = gradientDcDx(1.0f / top.v.w, 1.0f / mid.v.w, 1.0f / bot.v.w, top, mid, bot);
+	float inverseZYStep = gradientDcDy(1.0f / top.v.w, 1.0f / mid.v.w, 1.0f / bot.v.w, top, mid, bot);
 
-	double depthZXStep = gradientDcDx(top.v.z, mid.v.z, bot.v.z, verticies);
-	double depthZYStep = gradientDcDy(top.v.z, mid.v.z, bot.v.z, verticies);
+	float depthZXStep = gradientDcDx(top.v.z, mid.v.z, bot.v.z, top, mid, bot);
+	float depthZYStep = gradientDcDy(top.v.z, mid.v.z, bot.v.z, top, mid, bot);
 
 	//if mid point is on right
 	//Cz = AxBy - AyBx
 	if (((top.v.x - mid.v.x) * (top.v.y - bot.v.y)) - ((top.v.y - mid.v.y) * (top.v.x - bot.v.x)) < 0) {
 		
-		double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
-		double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
+		float topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
+		//if (top.v.y - mid.v.y == 0)
+			//topToMidXStep = 0;
+		float topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
 
-		double yPreStep = int(top.v.y) - top.v.y;
-		double xPreStep = yPreStep * topToBotXStep;
+		float yPreStep = int(top.v.y) - top.v.y;
+		float xPreStep = yPreStep * topToBotXStep;
 
-		double leftX = top.v.x + (yPreStep * topToBotXStep);
-		double rightX = top.v.x + (yPreStep * topToMidXStep);
+		float leftX = top.v.x + (yPreStep * topToBotXStep);
+		float rightX = top.v.x + (yPreStep * topToMidXStep);
 		
 		//z depth coordinate
-		double depthZStartLeft = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
-		double depthZNextLineLeft = depthZYStep + (depthZXStep * topToBotXStep);
+		float depthZStartLeft = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		float depthZNextLineLeft = depthZYStep + (depthZXStep * topToBotXStep);
 		//inverse z coordinate
-		double inverseZStartLeft = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
-		double inverseZNextLineLeft = inverseZYStep + (inverseZXStep * topToBotXStep);
+		float inverseZStartLeft = (1.0f / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
+		float inverseZNextLineLeft = inverseZYStep + (inverseZXStep * topToBotXStep);
 		//x texture coordinate
-		double texCoordStartXLeft = top.t.x * (1.0 / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
-		double texCoordXNextLineLeft = textureXYStep + (textureXXStep * topToBotXStep);
+		float texCoordStartXLeft = top.t.x * (1.0f / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
+		float texCoordXNextLineLeft = textureXYStep + (textureXXStep * topToBotXStep);
 		//y texture coordinate
-		double texCoordStartYLeft = top.t.y * (1.0 / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
-		double texCoordYNextLineLeft = textureYYStep + (textureYXStep * topToBotXStep);
+		float texCoordStartYLeft = top.t.y * (1.0f / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
+		float texCoordYNextLineLeft = textureYYStep + (textureYXStep * topToBotXStep);
 
 		xPreStep = yPreStep * topToMidXStep;
 		//z depth coordinate
-		double depthZStartRight = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
-		double depthZNextLineRight = depthZYStep + (depthZXStep * topToMidXStep);
+		float depthZStartRight = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		float depthZNextLineRight = depthZYStep + (depthZXStep * topToMidXStep);
 		//inverse z coordinate
-		double inverseZStartRight = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
-		double inverseZNextLineRight = inverseZYStep + (inverseZXStep * topToMidXStep);
+		float inverseZStartRight = (1.0f / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
+		float inverseZNextLineRight = inverseZYStep + (inverseZXStep * topToMidXStep);
 		//x texture coordinate
-		double texCoordStartXRight = top.t.x * (1.0 / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
-		double texCoordXNextLineRight = textureXYStep + (textureXXStep * topToMidXStep);
+		float texCoordStartXRight = top.t.x * (1.0f / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
+		float texCoordXNextLineRight = textureXYStep + (textureXXStep * topToMidXStep);
 		//y texture coordinate
-		double texCoordStartYRight = top.t.y * (1.0 / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
-		double texCoordYNextLineRight = textureYYStep + (textureYXStep * topToMidXStep);
+		float texCoordStartYRight = top.t.y * (1.0f / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
+		float texCoordYNextLineRight = textureYYStep + (textureYXStep * topToMidXStep);
 		
 		//draw scanlines from top.y to mid.y
-		for (int y = (int)(top.v.y); y > (int)(mid.v.y); y--) {
+		for (int y = (int)(top.v.y) - 1; y >= (int)(mid.v.y); y--) {
 			
-			double xPreStep = int(leftX + 1.0) - leftX;
-			double xdist = rightX - leftX;
-			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
-			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
-			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
-			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
+			float xPreStep = int(leftX + 1.0) - leftX;
+			float xdist = rightX - leftX;
+			float XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
+			float YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
+			float ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			float ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
-			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
-			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
-			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
-			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
+			float textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
+			float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
+			float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			//float depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
-				double texX = textureCoordX*z;
-				double texY = textureCoordY*z;
+				//double texX = textureCoordX*z;
+				//double texY = textureCoordY*z;
 
-				if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
-					int stop = 0;
-				}
+				//if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
+				//	int stop = 0;
+				//}
 
 				//Color_RGB color(mesh->texture->getPixelColor((int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5), (int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)));
 
-				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+				if (z < depthBuffer[y * cam->width + x]) {
 					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 3) = (unsigned char)0;
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					//*(pixelComponent + 3) = (unsigned char)0;
 
-					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+					depthBuffer[y * cam->width + x] = z;
 				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
-				depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -216,8 +408,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			depthZStartRight -= depthZNextLineRight;
 		}
 		
-		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
-		
+		float midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
+		//if (mid.v.y - bot.v.y == 0)
+			//midToBotXStep = 0;
 		yPreStep = int(mid.v.y) - mid.v.y;
 		xPreStep = yPreStep * midToBotXStep;
 
@@ -228,55 +421,54 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		depthZStartRight = mid.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
 		depthZNextLineRight = depthZYStep + (depthZXStep * midToBotXStep);
 		//inverse z coordinate
-		inverseZStartRight = (1.0 / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
+		inverseZStartRight = (1.0f / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		inverseZNextLineRight = inverseZYStep + (inverseZXStep * midToBotXStep);
 		//x texture coordinate
-		texCoordStartXRight = mid.t.x * (1.0 / mid.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
+		texCoordStartXRight = mid.t.x * (1.0f / mid.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
 		texCoordXNextLineRight = textureXYStep + (textureXXStep * midToBotXStep);
 		//y texture coordinate
-		texCoordStartYRight = mid.t.y * (1.0 / mid.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
+		texCoordStartYRight = mid.t.y * (1.0f / mid.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
 		texCoordYNextLineRight = textureYYStep + (textureYXStep * midToBotXStep);
 
-		for (int y = (int)(mid.v.y); y > (int)(bot.v.y); y--) {
+		for (int y = (int)(mid.v.y) - 1; y >= (int)(bot.v.y); y--) {
 
-			double xPreStep = int(leftX + 1.0) - leftX;
-			double xdist = rightX - leftX;
-			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
-			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
-			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
-			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
+			float xPreStep = int(leftX + 1.0) - leftX;
+			float xdist = rightX - leftX;
+			float XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
+			float YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
+			float ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			float ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
-			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
-			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
-			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
-			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
+			float textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
+			float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
+			float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			//float depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
-				double texX = textureCoordX * z;
-				double texY = textureCoordY * z;
+				//double texX = textureCoordX*z;
+				//double texY = textureCoordY*z;
 
-				if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
-					int stop = 0;
-				}
+				//if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
+				//	int stop = 0;
+				//}
 
 				//Color_RGB color(mesh->texture->getPixelColor((int)((texX)*(mesh->texture->width - 1) + 0.5), (int)((texY)*(mesh->texture->height - 1) + 0.5)));
 
-				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+				if (z < depthBuffer[y * cam->width + x]) {
 					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 3) = (unsigned char)0;
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					//*(pixelComponent + 3) = (unsigned char)0;
 
-					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+					depthBuffer[y * cam->width + x] = z;
 				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
-				depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -298,83 +490,84 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 	}
 	else { //if midpoint is on the left
 		
-		double topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
-		double topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
+		float topToMidXStep = (top.v.x - mid.v.x) / (top.v.y - mid.v.y);
+		//if (top.v.y - mid.v.y == 0)
+			//topToMidXStep = 0;
+		float topToBotXStep = (top.v.x - bot.v.x) / (top.v.y - bot.v.y);
 
-		double yPreStep = int(top.v.y) - top.v.y;
-		double xPreStep = yPreStep * topToMidXStep;
+		float yPreStep = int(top.v.y) - top.v.y;
+		float xPreStep = yPreStep * topToMidXStep;
 
-		double leftX = top.v.x + (yPreStep * topToMidXStep);
-		double rightX = top.v.x + (yPreStep * topToBotXStep);
+		float leftX = top.v.x + (yPreStep * topToMidXStep);
+		float rightX = top.v.x + (yPreStep * topToBotXStep);
 
 		//z depth coordinate
-		double depthZStartLeft = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
-		double depthZNextLineLeft = depthZYStep + (depthZXStep * topToBotXStep);
+		float depthZStartLeft = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		float depthZNextLineLeft = depthZYStep + (depthZXStep * topToBotXStep);
 		//inverse z coordinate
-		double inverseZStartLeft = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
-		double inverseZNextLineLeft = inverseZYStep + (inverseZXStep * topToMidXStep);
+		float inverseZStartLeft = (1.0f / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
+		float inverseZNextLineLeft = inverseZYStep + (inverseZXStep * topToMidXStep);
 		//x texture coordinate
-		double texCoordStartXLeft = top.t.x * (1.0 / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
-		double texCoordXNextLineLeft = textureXYStep + (textureXXStep * topToMidXStep);
+		float texCoordStartXLeft = top.t.x * (1.0f / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
+		float texCoordXNextLineLeft = textureXYStep + (textureXXStep * topToMidXStep);
 		//y texture coordinate
-		double texCoordStartYLeft = top.t.y * (1.0 / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
-		double texCoordYNextLineLeft = textureYYStep + (textureYXStep * topToMidXStep);
+		float texCoordStartYLeft = top.t.y * (1.0f / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
+		float texCoordYNextLineLeft = textureYYStep + (textureYXStep * topToMidXStep);
 
 		xPreStep = yPreStep * topToBotXStep;
 		//z depth coordinate
-		double depthZStartRight = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
-		double depthZNextLineRight = depthZYStep + (depthZXStep * topToBotXStep);
+		float depthZStartRight = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
+		float depthZNextLineRight = depthZYStep + (depthZXStep * topToBotXStep);
 		//inverse z coordinate
-		double inverseZStartRight = (1.0 / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
-		double inverseZNextLineRight = inverseZYStep + (inverseZXStep * topToBotXStep);
+		float inverseZStartRight = (1.0f / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
+		float inverseZNextLineRight = inverseZYStep + (inverseZXStep * topToBotXStep);
 		//x texture coordinate
-		double texCoordStartXRight = top.t.x * (1.0 / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
-		double texCoordXNextLineRight = textureXYStep + (textureXXStep * topToBotXStep);
+		float texCoordStartXRight = top.t.x * (1.0f / top.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
+		float texCoordXNextLineRight = textureXYStep + (textureXXStep * topToBotXStep);
 		//y texture coordinate
-		double texCoordStartYRight = top.t.y * (1.0 / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
-		double texCoordYNextLineRight = textureYYStep + (textureYXStep * topToBotXStep);
+		float texCoordStartYRight = top.t.y * (1.0f / top.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
+		float texCoordYNextLineRight = textureYYStep + (textureYXStep * topToBotXStep);
 
 		//draw scanlines from top.y to mid.y
-		for (int y = (int)(top.v.y); y > (int)(mid.v.y); y--) {
+		for (int y = (int)(top.v.y) - 1; y >= (int)(mid.v.y); y--) {
 
-			double xPreStep = int(leftX + 1.0) - leftX;
-			double xdist = rightX - leftX;
-			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
-			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
-			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
-			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
+			float xPreStep = int(leftX + 1.0) - leftX;
+			float xdist = rightX - leftX;
+			float XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
+			float YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
+			float ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			float ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
-			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
-			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
-			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
-			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
+			float textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
+			float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
+			float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			//float depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
-				double texX = textureCoordX * z;
-				double texY = textureCoordY * z;
+				//double texX = textureCoordX*z;
+				//double texY = textureCoordY*z;
 
-				if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
-					int stop = 0;
-				}
+				//if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
+				//	int stop = 0;
+				//}
 
 				//Color_RGB color(mesh->texture->getPixelColor((int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5), (int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)));
 
-				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+				if (z < depthBuffer[y * cam->width + x]) {
 					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 3) = (unsigned char)0;
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					//*(pixelComponent + 3) = (unsigned char)0;
 
-					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+					depthBuffer[y * cam->width + x] = z;
 				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
-				depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -393,7 +586,9 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 			depthZStartRight -= depthZNextLineRight;
 		}
 		
-		double midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
+		float midToBotXStep = (mid.v.x - bot.v.x) / (mid.v.y - bot.v.y);
+		//if (mid.v.y - bot.v.y == 0)
+			//midToBotXStep = 0;
 
 		yPreStep = int(mid.v.y) - mid.v.y;
 		xPreStep = yPreStep * midToBotXStep;
@@ -406,55 +601,55 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 		depthZStartLeft = mid.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
 		depthZNextLineLeft = depthZYStep + (depthZXStep * midToBotXStep);
 		//inverse z coordinate
-		inverseZStartLeft = (1.0 / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
+		inverseZStartLeft = (1.0f / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		inverseZNextLineLeft = inverseZYStep + (inverseZXStep * midToBotXStep);
 		//x texture coordinate
-		texCoordStartXLeft = mid.t.x * (1.0 / mid.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
+		texCoordStartXLeft = mid.t.x * (1.0f / mid.v.w) + (textureXXStep * xPreStep) + (textureXYStep * yPreStep);
 		texCoordXNextLineLeft = textureXYStep + (textureXXStep * midToBotXStep);
 		//y texture coordinate
-		texCoordStartYLeft = mid.t.y * (1.0 / mid.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
+		texCoordStartYLeft = mid.t.y * (1.0f / mid.v.w) + (textureYXStep * xPreStep) + (textureYYStep * yPreStep);
 		texCoordYNextLineLeft = textureYYStep + (textureYXStep * midToBotXStep);
 
-		for (int y = (int)(mid.v.y); y > (int)(bot.v.y); y--) {
+		for (int y = (int)(mid.v.y) - 1; y >= (int)(bot.v.y); y--) {
 
-			double xPreStep = int(leftX + 1.0) - leftX;
-			double xdist = rightX - leftX;
-			double XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
-			double YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
-			double ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
-			double ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
+			float xPreStep = int(leftX + 1.0) - leftX;
+			float xdist = rightX - leftX;
+			float XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
+			float YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
+			float ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+			float ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
-			double textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
-			double textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
-			double inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
-			double depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
+			float textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
+			float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
+			float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
+			//float depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 
 			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
-				double texX = textureCoordX * z;
-				double texY = textureCoordY * z;
+				//double texX = textureCoordX*z;
+				//double texY = textureCoordY*z;
 
-				if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
-					int stop = 0;
-				}
+				//if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
+				//	int stop = 0;
+				//}
 
 				//Color_RGB color(mesh->texture->getPixelColor((int)((texX)*(mesh->texture->width - 1) + 0.5), (int)((texY)*(mesh->texture->height - 1) + 0.5)));
 
-				if (depthZ < depthBuffer[(int)y * (int)cam->width + (int)x]) {
+				if (z < depthBuffer[y * cam->width + x]) {
 					char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)]);
-					*(pixelComponent + 3) = (unsigned char)0;
+					*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+					//*(pixelComponent + 3) = (unsigned char)0;
 
-					depthBuffer[(int)y * (int)cam->width + (int)x] = depthZ;
+					depthBuffer[y * cam->width + x] = z;
 				}
 
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
-				depthZ += ZXDepthStep;
+				//depthZ += ZXDepthStep;
 				//textureCoordX += textureXXStep;
 				//textureCoordY += textureYXStep;
 				//inverseZ += inverseZXStep;
@@ -489,33 +684,33 @@ inline void Pipeline::shadeTriangle(Vertex verticies[3], Vector4D texCoords[3], 
 	*/
 }
 
-inline double Pipeline::gradientDcDx(double c0, double c1, double c2, Vertex verticies[3]) {
-	return (((c1 - c2)*(verticies[0].v.y - verticies[2].v.y)) - ((c0 - c2)*(verticies[1].v.y - verticies[2].v.y)))/
-		(((verticies[1].v.x - verticies[2].v.x)*(verticies[0].v.y - verticies[2].v.y)) - ((verticies[0].v.x - verticies[2].v.x)*(verticies[1].v.y - verticies[2].v.y)));
+inline float Pipeline::gradientDcDx(float c0, float c1, float c2, Vertex &top, Vertex &mid, Vertex &bot) {
+	return (((c1 - c2)*(top.v.y - bot.v.y)) - ((c0 - c2)*(mid.v.y - bot.v.y))) /
+		(((mid.v.x - bot.v.x)*(top.v.y - bot.v.y)) - ((top.v.x - bot.v.x)*(mid.v.y - bot.v.y)));
 }
 
-inline double Pipeline::gradientDcDy(double c0, double c1, double c2, Vertex verticies[3]) {
-	return (((c1 - c2)*(verticies[0].v.x - verticies[2].v.x)) - ((c0 - c2)*(verticies[1].v.x - verticies[2].v.x))) /
-		(((verticies[0].v.x - verticies[2].v.x)*(verticies[1].v.y - verticies[2].v.y)) - ((verticies[1].v.x - verticies[2].v.x)*(verticies[0].v.y - verticies[2].v.y)));
+inline float Pipeline::gradientDcDy(float c0, float c1, float c2, Vertex &top, Vertex &mid, Vertex &bot) {
+	return (((c1 - c2)*(top.v.x - bot.v.x)) - ((c0 - c2)*(mid.v.x - bot.v.x))) /
+		(((top.v.x - bot.v.x)*(mid.v.y - bot.v.y)) - ((mid.v.x - bot.v.x)*(top.v.y - bot.v.y)));
 }
 
-inline void Pipeline::sortVerticies(Vertex verticies[3]) {
-	if (verticies[0].v.y < verticies[2].v.y) {
-		Vertex temp = verticies[0];
-		verticies[0] = verticies[2];
-		verticies[2] = temp;
+inline void Pipeline::sortVerticies(Vertex &top, Vertex &mid, Vertex &bot) {
+	if (top.v.y < bot.v.y) {
+		Vertex temp = top;
+		top = bot;
+		bot = temp;
 	}
 	
-	if (verticies[0].v.y < verticies[1].v.y) {
-		Vertex temp = verticies[0];
-		verticies[0] = verticies[1];
-		verticies[1] = temp;
+	if (top.v.y < mid.v.y) {
+		Vertex temp = top;
+		top = mid;
+		mid = temp;
 	}
 
-	if (verticies[1].v.y < verticies[2].v.y) {
-		Vertex temp = verticies[1];
-		verticies[1] = verticies[2];
-		verticies[2] = temp;
+	if (mid.v.y < bot.v.y) {
+		Vertex temp = mid;
+		mid = bot;
+		bot = temp;
 	}
 }
 

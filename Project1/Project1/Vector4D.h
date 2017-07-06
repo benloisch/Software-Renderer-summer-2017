@@ -8,13 +8,13 @@ class Vector4D
 {
 public:
 	
-	double x;
-	double y;
-	double z;
-	double w;
+	float x;
+	float y;
+	float z;
+	float w;
 
 	Vector4D();
-	Vector4D(double, double, double, double);
+	Vector4D(float, float, float, float);
 	Vector4D(int, int, int, int);
 	Vector4D(const Vector4D &vector);
 	~Vector4D();
@@ -27,21 +27,22 @@ public:
 	Vector4D& operator+=(const Vector4D &vector);
 	Vector4D& operator-=(const Vector4D &vector);
 	Vector4D& operator*=(const int integer);//componentwise integer multiplication
-	Vector4D& operator*=(const double floating);//componentwise floating point multiplication
+	Vector4D& operator*=(const float floating);//componentwise floating point multiplication
 	Vector4D& operator/=(const int integer);//componentwise integer division
-	Vector4D& operator/=(const double floating);//componentwise floating point division
+	Vector4D& operator/=(const float floating);//componentwise floating point division
 	Vector4D operator*(const int integer);//componentwise integer multiplication
-	Vector4D operator*(const double floating);//componentwise floating point multiplication
+	Vector4D operator*(const float floating);//componentwise floating point multiplication
 	Vector4D operator/(const int integer);//componentwise integer division
-	Vector4D operator/(const double floating);//componentwise floating point division
-	double operator*(const Vector4D &vector);//3D dot product (x*x + y*y + z*z) no w included
+	Vector4D operator/(const float floating);//componentwise floating point division
+	float operator*(const Vector4D &vector);//3D dot product (x*x + y*y + z*z) no w included
 	Vector4D operator^(const Vector4D &vector);//3D cross product
 
 	Vector4D operator*(const Matrix4x4 &matrix);//vector * matrix
 	Vector4D& operator*=(const Matrix4x4 &matrix);//vector = vector * matrix
 
-	double magnitude();//3D magnitude sqrt(x*x + y*y + z*z)
-	void normalize();//normalize 3D portion (x, y, z)
+	float inline magnitude();//3D magnitude sqrt(x*x + y*y + z*z)
+	void inline normalize();//normalize 3D portion (x, y, z)
+	Vector4D inline lerp(Vector4D &toVector, float t);
 
 };
 
@@ -50,13 +51,13 @@ public:
 inline
 Vector4D Vector4D::operator+(const Vector4D &vector)
 {
-	return Vector4D(this->x + vector.x, this->y + vector.y, this->z + vector.z, 0.0);
+	return Vector4D(this->x + vector.x, this->y + vector.y, this->z + vector.z, this->w + vector.w);
 }
 
 inline
 Vector4D Vector4D::operator-(const Vector4D &vector)
 {
-	return Vector4D(this->x - vector.x, this->y - vector.y, this->z - vector.z, 0.0);
+	return Vector4D(this->x - vector.x, this->y - vector.y, this->z - vector.z, this->w - vector.w);
 }
 
 inline
@@ -101,7 +102,7 @@ Vector4D& Vector4D::operator*=(const int integer)
 }
 
 inline
-Vector4D& Vector4D::operator*=(const double floating)
+Vector4D& Vector4D::operator*=(const float floating)
 {
 	this->x *= floating;
 	this->y *= floating;
@@ -121,7 +122,7 @@ Vector4D& Vector4D::operator/=(const int integer)
 }
 
 inline
-Vector4D& Vector4D::operator/=(const double floating)
+Vector4D& Vector4D::operator/=(const float floating)
 {
 	this->x /= floating;
 	this->y /= floating;
@@ -131,19 +132,19 @@ Vector4D& Vector4D::operator/=(const double floating)
 }
 
 inline
-Vector4D Vector4D::operator*(const double floating)
+Vector4D Vector4D::operator*(const float floating)
 {
-	return Vector4D(this->x * floating, this->y * floating, this->z * floating, 0.0);
+	return Vector4D(this->x * floating, this->y * floating, this->z * floating, this->w * floating);
 }
 
 inline
 Vector4D Vector4D::operator*(const int integer)
 {
-	return Vector4D(this->x * integer, this->y * integer, this->z * integer, 0.0);
+	return Vector4D(this->x * integer, this->y * integer, this->z * integer, this->w * integer);
 }
 
 inline
-Vector4D Vector4D::operator/(const double floating)
+Vector4D Vector4D::operator/(const float floating)
 {
 	this->x /= floating;
 	this->y /= floating;
@@ -159,7 +160,7 @@ Vector4D Vector4D::operator/(const int integer)
 }
 
 inline
-double Vector4D::operator*(const Vector4D &vector)
+float Vector4D::operator*(const Vector4D &vector)
 {
 	return (this->x * vector.x) + (this->y * vector.y) + (this->z * vector.z);
 }
@@ -180,7 +181,7 @@ Vector4D Vector4D::operator^(const Vector4D &vector)
 }
 
 inline
-double Vector4D::magnitude()
+float Vector4D::magnitude()
 {
 	return sqrt((x * x) + (y * y) + (z * z));
 }
@@ -188,7 +189,7 @@ double Vector4D::magnitude()
 inline
 void Vector4D::normalize()
 {
-	double mag = this->magnitude();
+	float mag = this->magnitude();
 
 	this->x /= mag;
 	this->y /= mag;
@@ -224,6 +225,10 @@ Vector4D& Vector4D::operator*=(const Matrix4x4 &matrix)
 	this->w = result.w;
 
 	return *this;
+}
+
+Vector4D inline Vector4D::lerp(Vector4D &toVector, float t) {
+	return *this + ((toVector - *this) * t);
 }
 
 #endif
