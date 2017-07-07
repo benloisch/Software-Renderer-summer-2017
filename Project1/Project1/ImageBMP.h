@@ -21,6 +21,8 @@ public:
 	unsigned char **green;
 	unsigned char **blue;
 
+	unsigned int *intbuffer;
+
 	unsigned int width;
 	unsigned int height;
 

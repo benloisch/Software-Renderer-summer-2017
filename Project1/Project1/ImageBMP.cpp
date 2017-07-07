@@ -40,6 +40,8 @@ void ImageBMP::cleanup() {
 			delete[] blue[i];
 	}
 
+	delete[] intbuffer;
+
 	delete[] red;
 	delete[] green;
 	delete[] blue;
@@ -54,6 +56,11 @@ void ImageBMP::createBMP(unsigned int width, unsigned int height, string fileNam
 	green = NULL;
 	blue = NULL;
 	try  {
+		//allocate same space as red, green, and blue chars except also have an alpha value
+		intbuffer = new unsigned int[width * height];
+		for (unsigned int i = 0; i < width * height; i++)
+			intbuffer[i] = 0;
+
 		red = new unsigned char*[width];
 		for (unsigned int r = 0; r < width; r++) { //set newly created array to NULL so if a catch happens, we can delete it
 			red[r] = NULL;
@@ -175,6 +182,12 @@ void ImageBMP::loadBMP(string inFileName) {
 				unsigned char b = fgetc(file);
 				unsigned char g = fgetc(file);
 				unsigned char r = fgetc(file);
+
+				//set intbuffer with BGRA (blue green red alpha)
+				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)b);
+				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)g << 8);
+				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)r << 16);
+
 				setPixelColor(w, h, r, g, b);
 			}
 

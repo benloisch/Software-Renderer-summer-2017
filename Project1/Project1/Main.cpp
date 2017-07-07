@@ -50,7 +50,7 @@ int main() {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1920, 1080);
+	Win32WindowBuffer win32WindowBuffer(1366, 768);
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
@@ -118,24 +118,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.0f, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
 
 	
-	for (float i = 0; i < 0; i++) {
+	for (float i = 0; i < 1; i++) {
 		//top left triangle
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, i, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, i, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, i, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
+		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
+		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, 0.0f, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
+		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
 
 		//bottom right triangle
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, i, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, i, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, i, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
+		mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.0f, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
+		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
+		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
 	}
 	
 
 	mesh.texture = new ImageBMP;
-	mesh.texture->loadBMP("randompixels");
+	mesh.texture->loadBMP("checkerboard");
 
 	mesh2.texture = new ImageBMP;
-	mesh2.texture->loadBMP("smiley");
+	mesh2.texture->loadBMP("checkerboard");
 	//***********************************************************Old StarField3D code
 	/*
 	//Vertex stars[100000];
@@ -278,7 +278,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 		//**********************************************************Render mesh objects
 
-		//pipeline.transform(&mesh);
+		pipeline.transform(&mesh);
 		//pipeline.transform(&mesh2);
 
 		//pipeline.transform verticies
