@@ -552,7 +552,7 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 			float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 			float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
 			//float depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
-			unsigned int *ibuffer = ((unsigned int*)(buffer + ((y * (int)cam->width + (int)(leftX)) * 4)));
+			//unsigned int *ibuffer = ((unsigned int*)(buffer + ((y * (int)cam->width + (int)(leftX)) * 4)));
 			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
@@ -585,11 +585,12 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 					//unsigned char r = (unsigned char)(mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))] >> 8);
 					//unsigned char g = (unsigned char)(mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))] >> 16);
 					//unsigned char b = (unsigned char)(mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))] >> 24);
-					
-					*ibuffer = mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) + mesh->texture->width * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))];
+					*((unsigned int*)(buffer + ((y * (int)cam->width + x) * 4))) = mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) + mesh->texture->width * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))];
+
+					//*ibuffer = mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) + mesh->texture->width * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))];
 					depthBuffer[y * cam->width + x] = (float)z;
 				}
-				ibuffer++;
+				//ibuffer++;
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
@@ -648,7 +649,6 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 			float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 			float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
 			//float depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
-			unsigned int *ibuffer = ((unsigned int*)(buffer + ((y * (int)cam->width + (int)(leftX)) * 4)));
 			for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 				double z = 1.0 / inverseZ;
@@ -667,10 +667,9 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 					//*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
 					//*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
 					//*(pixelComponent + 3) = (unsigned char)0;
-					*ibuffer = mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) + mesh->texture->width * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))];
+					*((unsigned int*)(buffer + ((y * (int)cam->width + x) * 4))) = mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) + mesh->texture->width * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))];
 					depthBuffer[y * cam->width + x] = (float)z;
 				}
-				ibuffer++;
 				textureCoordX += XXStep;
 				textureCoordY += YXStep;
 				inverseZ += ZXStep;
