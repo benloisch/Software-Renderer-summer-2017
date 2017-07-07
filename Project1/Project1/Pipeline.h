@@ -9,6 +9,8 @@
 class Pipeline {
 public:
 
+	MSG *msg;
+
 	float* depthBuffer;
 
 	char* buffer;
@@ -173,8 +175,7 @@ inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 		if (current.v.y > -current.v.w) //if current vertex is inside, add to list
 			output.push_back(current);
 		//check if one is inside and one is outside and if so, clip and add to copy
-		//if ((current.v.y > -current.v.w && next.v.y <= -next.v.w) || (current.v.y < -current.v.w && next.v.x >= -next.v.w)) { //breaks
-		if ((current.v.y > -current.v.w && next.v.y < -next.v.w) || (current.v.y < -current.v.w && next.v.x > -next.v.w)) { //does not break
+		if ((current.v.y > -current.v.w && next.v.y < -next.v.w) || (current.v.y < -current.v.w && next.v.y > -next.v.w)) {
 			float t = (-current.v.w - current.v.y) / ((-current.v.w - current.v.y) - (-next.v.w - next.v.y));
 			Vertex v = current;
 			v.v = v.v.lerp(next.v, t);
@@ -256,6 +257,14 @@ inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 }
 
 inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
+	//check msg again to see if we pressed the escape key
+	if (PeekMessage(msg, 0, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(msg);
+		DispatchMessage(msg);
+	}
+	if (msg->hwnd == NULL) //cancel all rendering if we pressed esc key
+		return;
 
 	//project from homogenous clip space to NDC space
 	top.v /= top.v.w;
@@ -265,7 +274,7 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 	//perform z-culling
 	if (((mid.v - top.v) ^
 		(bot.v - top.v)).z > 0) {
-		//return;
+		return;
 	}
 
 	sortVerticies(top, mid, bot);

@@ -31,6 +31,7 @@ public:
 	*/
 
 	void FillBufferColor(float r, float g, float b);
+	inline void FillBufferBlack();
 
 	bool Win32WindowBuffer::initializeWindow(HINSTANCE instanceHandle, int show);
 	bool Win32WindowBuffer::initializeWindowApp(HINSTANCE instanceHandle, int show, Win32WindowBuffer *win32buf);
@@ -87,5 +88,21 @@ private:
 	//char *bytebuffer;
 
 };
+
+inline
+void Win32WindowBuffer::FillBufferBlack() {
+	for (int y = 0; y < clientHeight; y++)
+	{
+		for (int x = 0; x < clientWidth; x++)
+		{
+			*((int*)(bytebuffer + ((y * clientWidth + x) * 4))) = 0;
+		}
+
+		char *pixelComponent = bytebuffer + ((y * clientWidth + clientWidth) * 4);
+		for (int i = 0; i < padding; i++) {
+			bytebuffer[(y * clientWidth + clientWidth) * 4 + i] = (unsigned char)0;
+		}
+	}
+}
 
 #endif

@@ -117,7 +117,7 @@ inline void Camera::getInput(float &delta)
 	sMouse;
 	POINT mouseNow;
 	GetCursorPos(&mouseNow);
-	float movementspeed = 100.0f;
+	float movementspeed = 10.0f;
 	float rotationspeed = 10.0f;
 	if (GetAsyncKeyState(0x57)) //W
 	{
