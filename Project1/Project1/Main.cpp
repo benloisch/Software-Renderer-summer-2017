@@ -118,16 +118,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.0f, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
 
 	
-	for (float i = 0; i < 5000; i++) {
+	for (float i = 0; i < 2; i++) {
 		//top left triangle
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, i, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, i, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, i, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
+		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
+		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, 0.0f, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
+		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
 
 		//bottom right triangle
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, i, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, i, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, i, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
+		mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.0f, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
+		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
+		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
 	}
 	
 
@@ -258,7 +258,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		Matrix4x4 scale;
 		scale.setScale(1, 1, 1);
 		Matrix4x4 translate;
-		translate.setTranslate(0, 0, 3);
+		translate.setTranslate(0, 0, 1.5);
 		mesh.modelMesh = rotate * scale * translate;
 
 		rotate.setIdentity();
