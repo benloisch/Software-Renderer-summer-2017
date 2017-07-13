@@ -99,12 +99,8 @@ inline void Camera::calculateProjectionMatrix() {
 	w = z
 	*/
 
-	float oneOverAspect = 1.0f / aspectRatio;
-	if (aspectRatio < 1.0f)
-		projectionMatrix.m[0][0] = 1.0f / aspectRatio * tan(fieldOfView / 2.0f);
-	else
-	projectionMatrix.m[0][0] = 1.0f / oneOverAspect * tan(fieldOfView / 2.0f);
-	projectionMatrix.m[1][1] = 1.0f / tan(fieldOfView / 2.0f);
+	projectionMatrix.m[0][0] = 1.0f / (aspectRatio * tanf(fieldOfView / 2.0f));
+	projectionMatrix.m[1][1] = 1.0f / tanf(fieldOfView / 2.0f);
 	projectionMatrix.m[2][2] = farPlane / (farPlane - nearPlane);
 	projectionMatrix.m[2][3] = 1.0f;
 	projectionMatrix.m[3][2] = -nearPlane * farPlane / (farPlane - nearPlane);

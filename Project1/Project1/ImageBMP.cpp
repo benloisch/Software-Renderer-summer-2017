@@ -60,7 +60,7 @@ void ImageBMP::createBMP(unsigned int width, unsigned int height, string fileNam
 		intbuffer = new unsigned int[width * height];
 		for (unsigned int i = 0; i < width * height; i++)
 			intbuffer[i] = 0;
-
+		/*
 		red = new unsigned char*[width];
 		for (unsigned int r = 0; r < width; r++) { //set newly created array to NULL so if a catch happens, we can delete it
 			red[r] = NULL;
@@ -94,6 +94,7 @@ void ImageBMP::createBMP(unsigned int width, unsigned int height, string fileNam
 				blue[i][j] = 0;
 			}
 		}
+		*/
 	}
 	catch (...) {
 		throw exception("Error in ImageBMP.createBMP()");
@@ -188,7 +189,7 @@ void ImageBMP::loadBMP(string inFileName) {
 				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)g << 8);
 				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)r << 16);
 
-				setPixelColor(w, h, r, g, b);
+				//setPixelColor(w, h, r, g, b);
 			}
 
 			//eat up padding bytes

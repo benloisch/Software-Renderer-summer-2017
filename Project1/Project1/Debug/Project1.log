@@ -1,38 +1,6 @@
-﻿Build started 7/2/2017 6:34:05 PM.
-     1>Project "C:\Github\Repository\Software-Renderer-summer-2017\Project1\Project1\Project1.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp Pipeline.cpp
-         Main.cpp
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(220): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(298): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(395): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(474): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-         Generating Code...
-         Compiling...
-         Pipeline.cpp
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(220): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(298): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(395): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\github\repository\software-renderer-summer-2017\project1\project1\pipeline.h(474): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-         Generating Code...
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Github\Repository\Software-Renderer-summer-2017\Project1\Project1\Debug\Project1.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Github\Repository\Software-Renderer-summer-2017\Project1\Project1\Debug\Project1.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Github\Repository\Software-Renderer-summer-2017\Project1\Project1\Debug\Project1.lib" /MACHINE:X86 /PROFILE Debug\BufferInterface.obj
-         Debug\Camera.obj
-         Debug\Color_RGB.obj
-         Debug\High_Performance_Counter.obj
-         Debug\ImageBMP.obj
-         Debug\Main.obj
-         Debug\Matrix4x4.obj
-         Debug\Mesh.obj
-         Debug\Pipeline.obj
-         Debug\Vector4D.obj
-         Debug\Vertex.obj
-         Debug\Win32WindowBuffer.obj
-     1>LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/PROFILE' specification
-     1>BufferInterface.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:LBR' specification
-         Project1.vcxproj -> C:\Github\Repository\Software-Renderer-summer-2017\Project1\Project1\Debug\Project1.exe
-     1>Done Building Project "C:\Github\Repository\Software-Renderer-summer-2017\Project1\Project1\Project1.vcxproj" (Build target(s)).
-
-Build succeeded.
-
-Time Elapsed 00:00:02.83
+﻿  Main.cpp
+c:\users\ben loisch\documents\github\repository\software-renderer-summer-2017\project1\project1\main.cpp(71): warning C4305: 'argument': truncation from 'double' to 'float'
+LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/PROFILE' specification
+BufferInterface.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:LBR' specification
+  Project1.vcxproj -> C:\Users\Ben Loisch\Documents\GitHub\Repository\Software-Renderer-summer-2017\Project1\Project1\Debug\Project1.exe
+  Project1.vcxproj -> C:\Users\Ben Loisch\Documents\GitHub\Repository\Software-Renderer-summer-2017\Project1\Project1\Debug\Project1.pdb (Full PDB)
