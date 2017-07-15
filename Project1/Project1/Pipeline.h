@@ -20,6 +20,8 @@ public:
 	//Vector4D texCoords[3];
 	//Vector4D normals[3];
 
+	Vertex verticies[8];
+
 	Mesh *mesh;
 
 	Pipeline();
@@ -28,8 +30,8 @@ public:
 	inline void clearDepthBuffer();
 
 	void transform(Mesh *inputMesh);
-	inline void projectVerticies(Vertex verticies[3], Matrix4x4 &MVP);
-	inline vector<Vertex> clipVerticies(Vertex verticies[]);
+	inline void projectVerticies(Matrix4x4 &MVP);
+	inline int clipVerticies();
 	inline void shadeTriangle(Vertex top, Vertex mid, Vertex bot);
 	inline void sortVerticies(Vertex &top, Vertex &mid, Vertex &bot);
 	inline void scanline(int ystart, int yend);
@@ -85,27 +87,37 @@ inline void Pipeline::setCamera(Camera *inputCam) {
 	depthBuffer = new float[(int)((cam->width)*(cam->height))];
 }
 
-inline void Pipeline::projectVerticies(Vertex verticies[3], Matrix4x4 &MVP) {
+inline void Pipeline::projectVerticies(Matrix4x4 &MVP) {
 	verticies[0].v *= MVP;
 	verticies[1].v *= MVP;
 	verticies[2].v *= MVP;
 }
 
-inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
+inline int Pipeline::clipVerticies() {
 	//check if entire triangle lies outside viewing frustum
 	//clip in homogenous clip space
-	vector<Vertex> output;
+	//vector<Vertex> output;
 
 	//clip x, y, and z against -w and w
 	//t = (currentW - currentP)  / *(currentW - currentP) - (nextW - nextP))
 
-	Vertex current = verticies[2];
-	Vertex next = verticies[0];
+	Vertex current = verticies[0];
+	Vertex next = verticies[1];
+
+	int currIndex = 0;
 
 	for (unsigned int i = 0; i < 3; i++) {
 
-		if (current.v.x < current.v.w) //if current vertex is inside, add to list
-			output.push_back(current);
+		if (i == 2) {
+			current = verticies[2];
+			next = verticies[0];
+		}
+
+		if (current.v.x < current.v.w) { //if current vertex is inside, add to list
+			//output.push_back(current);
+			verticies[currIndex] = current;
+			currIndex++;
+		}
 		//check if one is inside and one is outside and if so, clip and add to copy
 		if ((current.v.x < current.v.w && next.v.x > next.v.w) || (current.v.x > current.v.w && next.v.x < next.v.w)) {
 			float t = (current.v.w - current.v.x) / ((current.v.w - current.v.x) - (next.v.w - next.v.x));
@@ -114,30 +126,50 @@ inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 			v.t = v.t.lerp(next.t, t);
 			v.v.x = v.v.w;
 			//v.v.x -= 0.0001f;
-			output.push_back(v);
+			//output.push_back(v);
+			verticies[currIndex] = v;
+			currIndex++;
 		}
 
-		if (i != 2) {
-			current = verticies[i];
-			next = verticies[i + 1];
-		}
+		current = verticies[i+1];
+		next = verticies[i+2];
 	}
 
-	vector<Vertex> input;
-	if (output.size() != 0)
-		input = output;
-	else
-		return output;
+	if (currIndex < 2)
+		return 0;
 
-	output.clear();
+	//vector<Vertex> input;
+	//if (output.size() != 0)
+	//	input = output;
+	//else
+	//	return output;
 
-	current = input[input.size() - 1];
-	next = input[0];
+	//output.clear();
 
-	for (unsigned int i = 0; i < input.size(); i++) {
+	current = verticies[0];
+	next = verticies[1];
 
-		if (-current.v.x < current.v.w) //if current vertex is inside, add to list
-			output.push_back(current);
+	bool resetMax = true;
+
+	int max = currIndex;
+	currIndex = 0;
+	for (unsigned int i = 0; i < max; i++) {
+
+		//if (resetMax) {
+		//	currIndex = 0;
+		//	resetMax = false;
+		//}
+
+		if (i == max - 1) {
+			current = verticies[currIndex];
+			next = verticies[0];
+		}
+
+		if (-current.v.x < current.v.w) { //if current vertex is inside, add to list
+			//output.push_back(current);
+			verticies[currIndex] = current;
+			currIndex++;
+		}
 		//check if one is inside and one is outside and if so, clip and add to copy
 		if ((-current.v.x < current.v.w && -next.v.x > next.v.w) || (-current.v.x > current.v.w && -next.v.x < next.v.w)) {
 			float t = (-current.v.w - current.v.x) / ((-current.v.w - current.v.x) - (-next.v.w - next.v.x));
@@ -146,29 +178,43 @@ inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 			v.t = v.t.lerp(next.t, t);
 			v.v.x = -v.v.w;
 			//v.v.x += 0.0001f;
-			output.push_back(v);
+			//output.push_back(v);
+			verticies[currIndex] = v;
+			currIndex++;
 		}
 
-		if (i != input.size() - 1){
-			current = input[i];
-			next = input[i + 1];
-		}
+		current = verticies[i + 1];
+		next = verticies[i + 2];
 	}
 	
-	if (output.size() != 0)
-		input = output;
-	else
-		return output;
+	if (currIndex < 2)
+		return 0;
 
-	output.clear();
+	//vector<Vertex> input;
+	//if (output.size() != 0)
+	//	input = output;
+	//else
+	//	return output;
 
-	current = input[input.size() - 1];
-	next = input[0];
+	//output.clear();
 
-	for (unsigned int i = 0; i < input.size(); i++) {
+	current = verticies[0];
+	next = verticies[1];
 
-		if (current.v.y < current.v.w) //if current vertex is inside, add to list
-			output.push_back(current);
+	max = currIndex;
+	currIndex = 0;
+	for (unsigned int i = 0; i < max; i++) {
+
+		if (i == max - 1) {
+			current = verticies[currIndex];
+			next = verticies[0];
+		}
+
+		if (current.v.y < current.v.w) { //if current vertex is inside, add to list
+			//output.push_back(current);
+			verticies[currIndex] = current;
+			currIndex++;
+		}
 		//check if one is inside and one is outside and if so, clip and add to copy
 		if ((current.v.y < current.v.w && next.v.y > next.v.w) || (current.v.y > current.v.w && next.v.y < next.v.w)) {
 			float t = (current.v.w - current.v.y) / ((current.v.w - current.v.y) - (next.v.w - next.v.y));
@@ -177,29 +223,44 @@ inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 			v.t = v.t.lerp(next.t, t);
 			v.v.y = v.v.w;
 			//v.v.y -= 0.0001f;
-			output.push_back(v);
+			//output.push_back(v);
+			verticies[currIndex] = v;
+			currIndex++;
 		}
 
-		if (i != input.size() - 1){
-			current = input[i];
-			next = input[i + 1];
-		}
+		current = verticies[i + 1];
+		next = verticies[i + 2];
 	}
 	
-	if (output.size() != 0)
-		input = output;
-	else
-		return output;
+	if (currIndex < 2)
+		return 0;
 
-	output.clear();
+	//vector<Vertex> input;
+	//if (output.size() != 0)
+	//	input = output;
+	//else
+	//	return output;
 
-	current = input[input.size() - 1];
-	next = input[0];
+	//output.clear();
 
-	for (unsigned int i = 0; i < input.size(); i++) {
+	current = verticies[0];
+	next = verticies[1];
 
-		if (-current.v.y < current.v.w) //if current vertex is inside, add to list
-			output.push_back(current);
+	max = currIndex;
+	currIndex = 0;
+
+	for (unsigned int i = 0; i < max; i++) {
+
+		if (i == max - 1) {
+			current = verticies[currIndex];
+			next = verticies[0];
+		}
+
+		if (-current.v.y < current.v.w) { //if current vertex is inside, add to list
+			//output.push_back(current);
+			verticies[currIndex] = current;
+			currIndex++;
+		}
 		//check if one is inside and one is outside and if so, clip and add to copy
 		if ((-current.v.y < current.v.w && -next.v.y > next.v.w) || (-current.v.y > current.v.w && -next.v.y < next.v.w)) {
 			float t = (-current.v.w - current.v.y) / ((-current.v.w - current.v.y) - (-next.v.w - next.v.y));
@@ -208,13 +269,13 @@ inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 			v.t = v.t.lerp(next.t, t);
 			v.v.y = -v.v.w;
 			//v.v.y += 0.0001f;
-			output.push_back(v);
+			//output.push_back(v);
+			verticies[currIndex] = v;
+			currIndex++;
 		}
 
-		if (i != input.size() - 1){
-			current = input[i];
-			next = input[i + 1];
-		}
+		current = verticies[i + 1];
+		next = verticies[i + 2];
 	}
 	/*
 	if (output.size() != 0)
@@ -279,7 +340,7 @@ inline vector<Vertex> Pipeline::clipVerticies(Vertex verticies[3]) {
 		}
 	}
 	*/
-	return output;
+	return currIndex;
 }
 
 inline void Pipeline::scanline(int ystart, int yend) {

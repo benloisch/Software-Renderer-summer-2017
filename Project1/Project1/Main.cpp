@@ -68,7 +68,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	Camera cam;
 	cam.setOriginPosition(0, 0, 0);
 	//cam.setLookDirection(0.01, 0.7505, 1);
-	cam.setLookDirection(0.01f, 0.7505f, 1);
+	cam.setLookDirection(0.0f, 0.0f, 1);
 	cam.calculateViewMatrix();
 
 	//define projection matrix
@@ -156,6 +156,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	Mesh mesh3;
 	Mesh mesh4;
 	Mesh mesh5;
+	Mesh triangleMesh;
 
 	mesh.loadTexture("Textures/moskvitch");
 	mesh.loadModel("Models/moskvitch");
@@ -171,6 +172,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	mesh5.loadTexture("Textures/ZombiDog");
 	mesh5.loadModel("Models/ZombiDog");
+
+	triangleMesh.loadTexture("smiley");
+	triangleMesh.loadModel("Models/triangle");
 
 //	mesh.texture->saveBMP();
 
@@ -292,7 +296,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		rot += delta;
 
 		Matrix4x4 rotate;
-		rotate.setYrot(0);
+		rotate.setYrot(rot);
 		Matrix4x4 scale;
 		scale.setScale(1, 1, 1);
 		Matrix4x4 translate;
@@ -304,11 +308,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		scale.setIdentity();
 		scale.setScale(0.005, 0.005, 0.005);
 		translate.setIdentity();
-		translate.setTranslate(5, 0, 0);
+		translate.setTranslate(0, 0, 0.5);
 		mesh2.modelMesh = rotate * scale * translate;
 
 		rotate.setIdentity();
-		rotate.setYrot(0);
+		rotate.setYrot(rot);
 		scale.setIdentity();
 		scale.setScale(1, 1, 1);
 		translate.setIdentity();
@@ -316,7 +320,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		mesh3.modelMesh = rotate * scale * translate;
 
 		rotate.setIdentity();
-		rotate.setYrot(0);
+		rotate.setYrot(rot);
 		scale.setIdentity();
 		scale.setScale(0.01, 0.01, 0.01);
 		translate.setIdentity();
@@ -324,12 +328,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		mesh4.modelMesh = rotate * scale * translate;
 
 		rotate.setIdentity();
-		rotate.setYrot(0);
+		rotate.setYrot(rot);
 		scale.setIdentity();
 		scale.setScale(1, 1, 1);
 		translate.setIdentity();
 		translate.setTranslate(3, 0, 0);
 		mesh5.modelMesh = rotate * scale * translate;
+
+		rotate.setIdentity();
+		rotate.setYrot(0);
+		scale.setIdentity();
+		scale.setScale(1, 1, 1);
+		translate.setIdentity();
+		translate.setTranslate(0, 0, 1);
+		triangleMesh.modelMesh = rotate * scale * translate;
 
 		win32WindowBuffer.FillBufferBlack();
 		//win32WindowBuffer.FillBufferColor(255, 255, 255);
@@ -341,17 +353,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 		//**********************************************************Render mesh objects
 
-		pipeline.transform(&mesh);
-		rotate.setYrot(0);
+		//pipeline.transform(&mesh);
+		rotate.setYrot(rot);
 		scale.setScale(1, 1, 1);
 		translate.setTranslate(0, 0, 6);
 		mesh.modelMesh = rotate * scale * translate;
-		pipeline.transform(&mesh);
+		//pipeline.transform(&mesh);
 
-		pipeline.transform(&mesh2);
-		pipeline.transform(&mesh3);
-		pipeline.transform(&mesh4);
-		pipeline.transform(&mesh5);
+		//pipeline.transform(&mesh2);
+		//pipeline.transform(&mesh3);
+		//pipeline.transform(&mesh4);
+		//pipeline.transform(&mesh5);
+
+		pipeline.transform(&triangleMesh);
 
 		//pipeline.transform verticies
 			//perform z-culling first
