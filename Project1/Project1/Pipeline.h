@@ -2,12 +2,15 @@
 #define PIPELINE_H_
 
 #include <vector>
+#include <thread>
 
 #include "Mesh.h"
 #include "Camera.h"
 
 class Pipeline {
 public:
+
+	int trianglesRendered;
 
 	MSG *msg;
 
@@ -20,7 +23,7 @@ public:
 	//Vector4D texCoords[3];
 	//Vector4D normals[3];
 
-	Vertex verticies[8];
+	Vertex verticies[14];
 
 	Mesh *mesh;
 
@@ -36,12 +39,18 @@ public:
 	inline void sortVerticies(Vertex &top, Vertex &mid, Vertex &bot);
 	inline void scanline(int ystart, int yend);
 
+	inline float saturate(float lightVal);
+
 	inline float gradientDcDx(float c0, float c1, float c2, Vertex &top, Vertex &mid, Vertex &bot);
 	inline float gradientDcDy(float c0, float c1, float c2, Vertex &top, Vertex &mid, Vertex &bot);
 
 	//variables used for shading triangle
+	Vector4D directionalLight;
+
 	float righthandslope;
 	float lefthandslope;
+	float lightXStep;
+	float lightYStep;
 	float textureXXStep;
 	float textureXYStep;
 	float textureYXStep;
@@ -54,12 +63,16 @@ public:
 	float rightX;
 	float inverseZStartLeft;
 	float inverseZNextLineLeft;
+	float lightStartLeft;
+	float lightNextLineLeft;
 	float texCoordStartXLeft;
 	float texCoordXNextLineLeft;
 	float texCoordStartYLeft;
 	float texCoordYNextLineLeft;
 	float inverseZStartRight;
 	float inverseZNextLineRight;
+	float lightStartRight;
+	float lightNextLineRight;
 	float texCoordStartXRight;
 	float texCoordXNextLineRight;
 	float texCoordStartYRight;
@@ -71,6 +84,17 @@ private:
 
 
 };
+
+inline float Pipeline::saturate(float lightVal) {
+	if (lightVal <= 0.0f) {
+		return 0.0f;
+	}
+	if (lightVal > 1.0f) {
+		return 1.0f;
+	}
+
+	return lightVal;
+}
 
 inline void Pipeline::clearDepthBuffer() {
 	for (int i = 0; i < cam->width*cam->height; i++) {
@@ -101,22 +125,87 @@ inline int Pipeline::clipVerticies() {
 	//clip x, y, and z against -w and w
 	//t = (currentW - currentP)  / *(currentW - currentP) - (nextW - nextP))
 
-	Vertex current = verticies[0];
-	Vertex next = verticies[1];
+	
+	float currVal, currW, nextVal, nextW;
 
-	int currIndex = 0;
+	//******************************************************************************** clip x against w
+	Vertex current;
+	Vertex next;
+	verticies[3] = verticies[0];
+	int topOfStack = 13;
 
 	for (unsigned int i = 0; i < 3; i++) {
 
-		if (i == 2) {
-			current = verticies[2];
-			next = verticies[0];
+		currVal = (verticies + i)->v.x;
+		currW = (verticies + i)->v.w;
+		nextVal = (verticies + i + 1)->v.x;
+		nextW = (verticies + i + 1)->v.w;
+		
+		if (currVal < currW) { //if current vertex is inside, add to list
+			verticies[topOfStack] = verticies[i];
+			topOfStack--;
+		}
+		//check if one is inside and one is outside and if so, clip and add to copy
+		if ((currVal < currW && nextVal > nextW) || (currVal > currW && nextVal < nextW)) {
+			float t = (currW - currVal) / ((currW - currVal) - (nextW - nextVal));
+			Vertex v = verticies[i];
+			v.v = v.v.lerp((verticies + i + 1)->v, t);
+			v.t = v.t.lerp((verticies + i + 1)->t, t);
+			v.v.x = v.v.w;
+			verticies[topOfStack] = v;
+			topOfStack--;
+		}
+	}
+
+	if (topOfStack > 11)
+		return 0;	
+	
+	//******************************************************************************** clip x against -w
+	verticies[topOfStack] = verticies[13];
+	int bottomOfStack = 0;
+
+	for (int i = 13; i > topOfStack; i--) {
+
+		currVal = (verticies + i)->v.x;
+		currW = (verticies + i)->v.w;
+		nextVal = (verticies + i - 1)->v.x;
+		nextW = (verticies + i - 1)->v.w;
+
+		if (-currVal < currW) { //if current vertex is inside, add to list
+			verticies[bottomOfStack] = verticies[i];
+			bottomOfStack++;
 		}
 
+		//check if one is inside and one is outside and if so, clip and add to copy
+		if ((-currVal < currW && -nextVal > nextW) || (-currVal > currW && -nextVal < nextW)) {
+			float t = (-currW - currVal) / ((-currW - currVal) - (-nextW - nextVal));
+			Vertex v = verticies[i];
+			v.v = v.v.lerp((verticies + i - 1)->v, t);
+			v.t = v.t.lerp((verticies + i - 1)->t, t);
+			v.v.x = -v.v.w;
+			verticies[bottomOfStack] = v;
+			bottomOfStack++;
+		}
+	}
+	
+	if (bottomOfStack < 2)
+		return 0;
+	
+	/*
+	//******************************************************************************** clip x against w
+	Vertex current;
+	Vertex next;
+	verticies[3] = verticies[0];
+	int topOfStack = 13;
+
+	for (unsigned int i = 0; i < 3; i++) {
+
+		current = verticies[i];
+		next = verticies[i + 1];
+
 		if (current.v.x < current.v.w) { //if current vertex is inside, add to list
-			//output.push_back(current);
-			verticies[currIndex] = current;
-			currIndex++;
+			verticies[topOfStack] = current;
+			topOfStack--;
 		}
 		//check if one is inside and one is outside and if so, clip and add to copy
 		if ((current.v.x < current.v.w && next.v.x > next.v.w) || (current.v.x > current.v.w && next.v.x < next.v.w)) {
@@ -125,50 +214,26 @@ inline int Pipeline::clipVerticies() {
 			v.v = v.v.lerp(next.v, t);
 			v.t = v.t.lerp(next.t, t);
 			v.v.x = v.v.w;
-			//v.v.x -= 0.0001f;
-			//output.push_back(v);
-			verticies[currIndex] = v;
-			currIndex++;
+			verticies[topOfStack] = v;
+			topOfStack--;
 		}
-
-		current = verticies[i+1];
-		next = verticies[i+2];
 	}
 
-	if (currIndex < 2)
-		return 0;
+	if (topOfStack > 11)
+		return 0;	
+	
+	//******************************************************************************** clip x against -w
+	verticies[topOfStack] = verticies[13];
+	int bottomOfStack = 0;
 
-	//vector<Vertex> input;
-	//if (output.size() != 0)
-	//	input = output;
-	//else
-	//	return output;
+	for (int i = 13; i > topOfStack; i--) {
 
-	//output.clear();
-
-	current = verticies[0];
-	next = verticies[1];
-
-	bool resetMax = true;
-
-	int max = currIndex;
-	currIndex = 0;
-	for (unsigned int i = 0; i < max; i++) {
-
-		//if (resetMax) {
-		//	currIndex = 0;
-		//	resetMax = false;
-		//}
-
-		if (i == max - 1) {
-			current = verticies[currIndex];
-			next = verticies[0];
-		}
+		current = verticies[i];
+		next = verticies[i - 1];
 
 		if (-current.v.x < current.v.w) { //if current vertex is inside, add to list
-			//output.push_back(current);
-			verticies[currIndex] = current;
-			currIndex++;
+			verticies[bottomOfStack] = current;
+			bottomOfStack++;
 		}
 		//check if one is inside and one is outside and if so, clip and add to copy
 		if ((-current.v.x < current.v.w && -next.v.x > next.v.w) || (-current.v.x > current.v.w && -next.v.x < next.v.w)) {
@@ -177,173 +242,148 @@ inline int Pipeline::clipVerticies() {
 			v.v = v.v.lerp(next.v, t);
 			v.t = v.t.lerp(next.t, t);
 			v.v.x = -v.v.w;
-			//v.v.x += 0.0001f;
-			//output.push_back(v);
-			verticies[currIndex] = v;
-			currIndex++;
+			verticies[bottomOfStack] = v;
+			bottomOfStack++;
 		}
-
-		current = verticies[i + 1];
-		next = verticies[i + 2];
 	}
 	
-	if (currIndex < 2)
+	if (bottomOfStack < 2)
 		return 0;
+		*/
+	//******************************************************************************** clip y against w
+	verticies[bottomOfStack] = verticies[0];
+	topOfStack = 13;
 
-	//vector<Vertex> input;
-	//if (output.size() != 0)
-	//	input = output;
-	//else
-	//	return output;
+	for (int i = 0; i < bottomOfStack; i++) {
 
-	//output.clear();
+		currVal = (verticies + i)->v.y;
+		currW = (verticies + i)->v.w;
+		nextVal = (verticies + i + 1)->v.y;
+		nextW = (verticies + i + 1)->v.w;
 
-	current = verticies[0];
-	next = verticies[1];
-
-	max = currIndex;
-	currIndex = 0;
-	for (unsigned int i = 0; i < max; i++) {
-
-		if (i == max - 1) {
-			current = verticies[currIndex];
-			next = verticies[0];
-		}
-
-		if (current.v.y < current.v.w) { //if current vertex is inside, add to list
-			//output.push_back(current);
-			verticies[currIndex] = current;
-			currIndex++;
+		if (currVal < currW) { //if current vertex is inside, add to list
+			verticies[topOfStack] = verticies[i];
+			topOfStack--;
 		}
 		//check if one is inside and one is outside and if so, clip and add to copy
-		if ((current.v.y < current.v.w && next.v.y > next.v.w) || (current.v.y > current.v.w && next.v.y < next.v.w)) {
-			float t = (current.v.w - current.v.y) / ((current.v.w - current.v.y) - (next.v.w - next.v.y));
-			Vertex v = current;
-			v.v = v.v.lerp(next.v, t);
-			v.t = v.t.lerp(next.t, t);
+		if ((currVal < currW && nextVal > nextW) || (currVal > currW && nextVal < nextW)) {
+			float t = (currW - currVal) / ((currW - currVal) - (nextW - nextVal));
+			Vertex v = verticies[i];
+			v.v = v.v.lerp((verticies + i + 1)->v, t);
+			v.t = v.t.lerp((verticies + i + 1)->t, t);
 			v.v.y = v.v.w;
-			//v.v.y -= 0.0001f;
-			//output.push_back(v);
-			verticies[currIndex] = v;
-			currIndex++;
+			verticies[topOfStack] = v;
+			topOfStack--;
 		}
-
-		current = verticies[i + 1];
-		next = verticies[i + 2];
 	}
-	
-	if (currIndex < 2)
+
+	if (topOfStack > 11)
 		return 0;
 
-	//vector<Vertex> input;
-	//if (output.size() != 0)
-	//	input = output;
-	//else
-	//	return output;
+	//******************************************************************************** clip y against -w
+	verticies[topOfStack] = verticies[13];
+	bottomOfStack = 0;
 
-	//output.clear();
+	for (int i = 13; i > topOfStack; i--) {
 
-	current = verticies[0];
-	next = verticies[1];
+		currVal = (verticies + i)->v.y;
+		currW = (verticies + i)->v.w;
+		nextVal = (verticies + i - 1)->v.y;
+		nextW = (verticies + i - 1)->v.w;
 
-	max = currIndex;
-	currIndex = 0;
-
-	for (unsigned int i = 0; i < max; i++) {
-
-		if (i == max - 1) {
-			current = verticies[currIndex];
-			next = verticies[0];
+		if (-currVal < currW) { //if current vertex is inside, add to list
+			verticies[bottomOfStack] = verticies[i];
+			bottomOfStack++;
 		}
 
-		if (-current.v.y < current.v.w) { //if current vertex is inside, add to list
-			//output.push_back(current);
-			verticies[currIndex] = current;
-			currIndex++;
-		}
 		//check if one is inside and one is outside and if so, clip and add to copy
-		if ((-current.v.y < current.v.w && -next.v.y > next.v.w) || (-current.v.y > current.v.w && -next.v.y < next.v.w)) {
-			float t = (-current.v.w - current.v.y) / ((-current.v.w - current.v.y) - (-next.v.w - next.v.y));
-			Vertex v = current;
-			v.v = v.v.lerp(next.v, t);
-			v.t = v.t.lerp(next.t, t);
+		if ((-currVal < currW && -nextVal > nextW) || (-currVal > currW && -nextVal < nextW)) {
+			float t = (-currW - currVal) / ((-currW - currVal) - (-nextW - nextVal));
+			Vertex v = verticies[i];
+			v.v = v.v.lerp((verticies + i - 1)->v, t);
+			v.t = v.t.lerp((verticies + i - 1)->t, t);
 			v.v.y = -v.v.w;
-			//v.v.y += 0.0001f;
-			//output.push_back(v);
-			verticies[currIndex] = v;
-			currIndex++;
+			verticies[bottomOfStack] = v;
+			bottomOfStack++;
 		}
-
-		current = verticies[i + 1];
-		next = verticies[i + 2];
 	}
-	/*
-	if (output.size() != 0)
-		input = output;
-	else
-		return output;
 
-	output.clear();
+	if (bottomOfStack < 2)
+		return 0;
 
-	current = input[input.size() - 1];
-	next = input[0];
+	//******************************************************************************** clip z against w
+	verticies[bottomOfStack] = verticies[0];
+	topOfStack = 13;
 
-	for (unsigned int i = 0; i < input.size(); i++) {
+	for (int i = 0; i < bottomOfStack; i++) {
 
-		if (current.v.z < current.v.w) //if current vertex is inside, add to list
-			output.push_back(current);
+		currVal = (verticies + i)->v.z;
+		currW = (verticies + i)->v.w;
+		nextVal = (verticies + i + 1)->v.z;
+		nextW = (verticies + i + 1)->v.w;
+
+		if (currVal < currW) { //if current vertex is inside, add to list
+			verticies[topOfStack] = verticies[i];
+			topOfStack--;
+		}
 		//check if one is inside and one is outside and if so, clip and add to copy
-		if ((current.v.z < current.v.w && next.v.z > next.v.w) || (current.v.z > current.v.w && next.v.z < next.v.w)) {
-			float t = (current.v.w - current.v.z) / ((current.v.w - current.v.z) - (next.v.w - next.v.z));
-			Vertex v = current;
-			v.v = v.v.lerp(next.v, t);
-			v.t = v.t.lerp(next.t, t);
+		if ((currVal < currW && nextVal > nextW) || (currVal > currW && nextVal < nextW)) {
+			float t = (currW - currVal) / ((currW - currVal) - (nextW - nextVal));
+			Vertex v = verticies[i];
+			v.v = v.v.lerp((verticies + i + 1)->v, t);
+			v.t = v.t.lerp((verticies + i + 1)->t, t);
 			v.v.z = v.v.w;
-			//v.v.z -= 0.0001f;
-			output.push_back(v);
-		}
-
-		if (i != input.size() - 1){
-			current = input[i];
-			next = input[i + 1];
+			verticies[topOfStack] = v;
+			topOfStack--;
 		}
 	}
 
-	if (output.size() != 0)
-		input = output;
-	else
-		return output;
+	if (topOfStack > 11)
+		return 0;
 
-	output.clear();
+	//******************************************************************************** clip z against 0
+	verticies[topOfStack] = verticies[13];
+	bottomOfStack = 0;
 
-	current = input[input.size() - 1];
-	next = input[0];
+	for (int i = 13; i > topOfStack; i--) {
 
-	for (unsigned int i = 0; i < input.size(); i++) {
+		currVal = (verticies + i)->v.z;
+		currW = 0;
+		nextVal = (verticies + i - 1)->v.z;
+		nextW = 0;
 
-		if (current.v.z > 0) //if current vertex is inside, add to list
-			output.push_back(current);
+		if (-currVal < currW) { //if current vertex is inside, add to list
+			verticies[bottomOfStack] = verticies[i];
+			bottomOfStack++;
+		}
+
 		//check if one is inside and one is outside and if so, clip and add to copy
-		if ((current.v.z > 0 && next.v.z < 0) || (current.v.z < 0 && next.v.z > 0)) {
-			float t = (0 - current.v.z) / ((0 - current.v.z) - (0 - next.v.z));
-			Vertex v = current;
-			v.v = v.v.lerp(next.v, t);
-			v.t = v.t.lerp(next.t, t);
-			v.v.z = 0.0f;
-			//v.v.z += 0.0001f;
-			output.push_back(v);
-		}
-
-		if (i != input.size() - 1){
-			current = input[i];
-			next = input[i + 1];
+		if ((-currVal < currW && -nextVal > nextW) || (-currVal > currW && -nextVal < nextW)) {
+			float t = (-currW - currVal) / ((-currW - currVal) - (-nextW - nextVal));
+			Vertex v = verticies[i];
+			v.v = v.v.lerp((verticies + i - 1)->v, t);
+			v.t = v.t.lerp((verticies + i - 1)->t, t);
+			v.v.z = 0.001f;
+			verticies[bottomOfStack] = v;
+			bottomOfStack++;
 		}
 	}
-	*/
-	return currIndex;
+
+	if (bottomOfStack < 2)
+		return 0;
+
+	return bottomOfStack;
 }
 
 inline void Pipeline::scanline(int ystart, int yend) {
+	int textureWidth = mesh->texture->width;
+	int textureWidthMinusOne = mesh->texture->width-1;
+	int textureHeightMinusOne = mesh->texture->height - 1;
+	/*
+	UINT tileW = 128;
+	UINT tileH = 128;
+	UINT widthInTiles = (textureWidth + tileW - 1) / tileW;
+	*/
 	for (int y = ystart - 1; y >= yend; y--) {
 
 		float xPreStep = int(leftX + 1.0) - leftX;
@@ -351,8 +391,10 @@ inline void Pipeline::scanline(int ystart, int yend) {
 		float XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 		float YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
 		float ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
+		float lghtXStep = (lightStartRight - lightStartLeft) / xdist;
 		//float ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
+		float lightValue = lightStartLeft + (lightXStep * xPreStep);
 		float textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
 		float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 		float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
@@ -361,43 +403,54 @@ inline void Pipeline::scanline(int ystart, int yend) {
 		unsigned int* ibuffer = (unsigned int*)(buffer + ((y * cam->width + (int)(leftX)) * 4));
 		for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
-			//double z = 1.0 / inverseZ;
-			//double texX = textureCoordX*z;
-			//double texY = textureCoordY*z;
-
-			//if (texX > 1 || texY > 1 || texX < 0 || texY < 0) {
-			//	int stop = 0;
-			//}
-
-			//Color_RGB color(mesh->texture->getPixelColor((int)((textureCoordX*z)*(mesh->texture->width - 1) + 0.5), (int)((textureCoordY*z)*(mesh->texture->height - 1) + 0.5)));
-
-			/*
-			if (z < depthBuffer[y * cam->width + x]) {
-			char *pixelComponent = buffer + ((y * (int)cam->width + x) * 4);
-			*(pixelComponent) = (unsigned char)(mesh->texture->blue[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
-			*(pixelComponent + 1) = (unsigned char)(mesh->texture->green[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
-			*(pixelComponent + 2) = (unsigned char)(mesh->texture->red[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
-			//*(pixelComponent + 3) = (unsigned char)0;
-
-			depthBuffer[y * cam->width + x] = z;
-			}
-			*/
-
 			if (inverseZ > *pdepth) {
-				//unsigned char red = (unsigned char)(mesh->texture->red[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
-				//unsigned char green = (unsigned char)(mesh->texture->green[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
-				//unsigned char blue = (unsigned char)(mesh->texture->blue[(int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)][(int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5)]);
+				float test = textureCoordX / inverseZ;
+				float test2 = textureCoordY / inverseZ;
+				if (test > 1.0)
+					test = 1.0;
+				if (test < 0.0)
+					test = 0.0;
+				if (test2 > 1.0)
+					test2 = 1.0;
+				if (test2 < 0.0)
+					test2 = 0.0;
 
-				//unsigned char r = (unsigned char)(mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))] >> 8);
-				//unsigned char g = (unsigned char)(mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))] >> 16);
-				//unsigned char b = (unsigned char)(mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))] >> 24);
-				*ibuffer = mesh->texture->intbuffer[((int)((textureCoordX / inverseZ)*(mesh->texture->width - 1) + 0.5)) + mesh->texture->width * ((int)((textureCoordY / inverseZ)*(mesh->texture->height - 1) + 0.5))];
+				int test3 = ((int)((test)*(textureWidthMinusOne)+0.5)) + textureWidth * ((int)((test2)*(textureHeightMinusOne)+0.5));
 
-				//*ibuffer = mesh->texture->intbuffer[((int)((textureCoordX * z)*(mesh->texture->width - 1) + 0.5)) + mesh->texture->width * ((int)((textureCoordY * z)*(mesh->texture->height - 1) + 0.5))];
+				//int x = (int)((test)*(textureWidthMinusOne)+0.5);
+				//int y = (int)((test2)*(textureHeightMinusOne)+0.5);
+				/*
+				UINT tileX = x / tileW;
+				UINT tileY = y / tileH;
+				UINT inTileX = x % tileW;
+				UINT inTileY = y % tileH;
+
+				static int test4 = 1020;
+				test4++;
+				if (test4 > 1021)
+					test4 = 0;
+				*/
+				//*ibuffer = mesh->texture->intbuffer[(tileY * widthInTiles + tileX) * (tileW * tileH) + inTileY * tileW + inTileX];
+				//*ibuffer = mesh->texture->intbuffer[test4 * textureWidth];
+				//*ibuffer = mesh->texture->intbuffer[test3];
+				int RGB = mesh->texture->intbuffer[test3];
+				unsigned char b = ((unsigned char*)(&RGB))[0] * lightValue;
+				unsigned char g = ((unsigned char*)(&RGB))[1] * lightValue;
+				unsigned char r = ((unsigned char*)(&RGB))[2] * lightValue;
+
+				RGB = 0;
+				RGB = RGB | ((unsigned int)b);
+				RGB = RGB | ((unsigned int)g << 8);
+				RGB = RGB | ((unsigned int)r << 16);
+
+				*ibuffer = RGB;
+
 				*pdepth = inverseZ;
 			}
+
 			ibuffer++;
 			pdepth++;
+			lightValue += lghtXStep;
 			textureCoordX += XXStep;
 			textureCoordY += YXStep;
 			inverseZ += ZXStep;
@@ -407,6 +460,8 @@ inline void Pipeline::scanline(int ystart, int yend) {
 		leftX -= lefthandslope;
 		rightX -= righthandslope;
 
+		lightStartLeft -= lightNextLineLeft;
+		lightStartRight -= lightNextLineRight;
 		texCoordStartXLeft -= texCoordXNextLineLeft;
 		texCoordStartYLeft -= texCoordYNextLineLeft;
 		texCoordStartXRight -= texCoordXNextLineRight;
@@ -428,21 +483,15 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 	}
 	if (msg->hwnd == NULL) //cancel all rendering if we pressed esc key
 		return;
-		*/
+	*/
 
 	//project from homogenous clip space to NDC space
 	top.v /= top.v.w;
 	mid.v /= mid.v.w;
 	bot.v /= bot.v.w;
 
-	//perform z-culling
-	if (((mid.v - top.v) ^
-		(bot.v - top.v)).z > 0) {
-		//return;
-	}
-
 	sortVerticies(top, mid, bot);
-
+	
 	if (1.0 - abs(top.v.x) < 0.00001) {
 		if (top.v.x < 0)
 			top.v.x = -1.0;
@@ -463,7 +512,7 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 		else
 			bot.v.x = 1.0;
 	}
-
+	
 	//this clipping will take place in the clipVerticies() function
 	if (top.v.x < -1.0 || top.v.x > 1.0 || top.v.y < -1.0 || top.v.y > 1.0 || top.v.z <= 0.0 || top.v.z > 1.0)
 		return;
@@ -488,6 +537,9 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 
 	inverseZXStep = gradientDcDx(1.0f / top.v.w, 1.0f / mid.v.w, 1.0f / bot.v.w, top, mid, bot) * oneoverdx;
 	inverseZYStep = gradientDcDy(1.0f / top.v.w, 1.0f / mid.v.w, 1.0f / bot.v.w, top, mid, bot) * -oneoverdx;
+
+	lightXStep = gradientDcDx(saturate(top.n * directionalLight)*0.8f + 0.2f, saturate(mid.n * directionalLight)*0.8f + 0.2f, saturate(bot.n * directionalLight)*0.8f + 0.2f, top, mid, bot) * oneoverdx;
+	lightYStep = gradientDcDy(saturate(top.n * directionalLight)*0.8f + 0.2f, saturate(mid.n * directionalLight)*0.8f + 0.2f, saturate(bot.n * directionalLight)*0.8f + 0.2f, top, mid, bot) * -oneoverdx;
 
 	//float depthZXStep = gradientDcDx(top.v.z, mid.v.z, bot.v.z, top, mid, bot);
 	//float depthZYStep = gradientDcDy(top.v.z, mid.v.z, bot.v.z, top, mid, bot);
@@ -515,6 +567,9 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 	//z depth coordinate
 	//float depthZStartLeft = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
 	//float depthZNextLineLeft = depthZYStep + (depthZXStep * topToBotXStep);
+	//light value
+	lightStartLeft = saturate(top.n * directionalLight)*0.8f + 0.2f + (lightXStep * xPreStep) + (lightYStep * yPreStep);
+	lightNextLineLeft = lightYStep + (lightXStep * lefthandslope);
 	//inverse z coordinate
 	inverseZStartLeft = (1.0f / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 	inverseZNextLineLeft = inverseZYStep + (inverseZXStep * lefthandslope);
@@ -529,6 +584,9 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 	//z depth coordinate
 	//float depthZStartRight = top.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
 	//float depthZNextLineRight = depthZYStep + (depthZXStep * topToMidXStep);
+	//light value
+	lightStartRight = saturate(top.n * directionalLight)*0.8f + 0.2f + (lightXStep * xPreStep) + (lightYStep * yPreStep);
+	lightNextLineRight = lightYStep + (lightXStep * righthandslope);
 	//inverse z coordinate
 	inverseZStartRight = (1.0f / top.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 	inverseZNextLineRight = inverseZYStep + (inverseZXStep * righthandslope);
@@ -553,6 +611,9 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 		//z depth coordinate
 		//depthZStartRight = mid.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
 		//depthZNextLineRight = depthZYStep + (depthZXStep * midToBotXStep);
+		//light value
+		lightStartRight = saturate(mid.n * directionalLight)*0.8f + 0.2f + (lightXStep * xPreStep) + (lightYStep * yPreStep);
+		lightNextLineRight = lightYStep + (lightXStep * righthandslope);
 		//inverse z coordinate
 		inverseZStartRight = (1.0f / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		inverseZNextLineRight = inverseZYStep + (inverseZXStep * righthandslope);
@@ -578,6 +639,9 @@ inline void Pipeline::shadeTriangle(Vertex top, Vertex mid, Vertex bot) {
 		//z depth coordinate
 		//depthZStartLeft = mid.v.z + (depthZXStep * xPreStep) + (depthZYStep * yPreStep);
 		//depthZNextLineLeft = depthZYStep + (depthZXStep * midToBotXStep);
+		//light value
+		lightStartLeft = saturate(mid.n * directionalLight)*0.8f + 0.2f + (lightXStep * xPreStep) + (lightYStep * yPreStep);
+		lightNextLineLeft = lightYStep + (lightXStep * lefthandslope);
 		//inverse z coordinate
 		inverseZStartLeft = (1.0f / mid.v.w) + (inverseZXStep * xPreStep) + (inverseZYStep * yPreStep);
 		inverseZNextLineLeft = inverseZYStep + (inverseZXStep * lefthandslope);

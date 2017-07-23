@@ -78,13 +78,13 @@ public:
 	//int threads;
 	//int threadIndex;
 
-private:
-
 	HWND windowHandle;
 
 	HDC hdc;
 	HDC memHdc;
 	HBITMAP buffer;
+
+private:
 	//char *bytebuffer;
 
 };

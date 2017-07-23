@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-//#include <thread>
+#include <thread>
 
 using namespace std;
 
@@ -38,6 +38,28 @@ void displayFPS(HighPerformanceCounter timer, HWND windowHandle)
 	}
 }
 
+void displayText(HDC *hdc, LPCWSTR lpcwstr, int integer, int x, int y) {
+	wchar_t text[100];
+	for (int i = 0; i < 100; i++)
+		text[i] = L'\0';
+	int size = 0;
+	for (; lpcwstr[size] != '\0'; size++)
+		text[size] = lpcwstr[size];
+
+	wchar_t intbuffer[20];
+	wsprintfW(intbuffer, L"%d", integer);
+
+	for (int i = 0; i < 20; i++) {
+		text[size] = intbuffer[i];
+		size++;
+
+		if (intbuffer[i] == '\0')
+			break;
+	}
+
+	TextOut(*hdc, x, y, text, size);
+}
+
 //********************************************************multithreading attempt
 /*void testFunc(Win32WindowBuffer *win32buf) {
 	win32buf->FillBufferColor(255, 0, 255);
@@ -66,9 +88,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(0, 0, 0);
+	cam.setOriginPosition(-20, 0, -20);
 	//cam.setLookDirection(0.01, 0.7505, 1);
-	cam.setLookDirection(0.0f, 0.0f, 1);
+	cam.setLookDirection(1, 0, 1);
 	cam.calculateViewMatrix();
 
 	//define projection matrix
@@ -89,81 +111,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	pipeline.setCamera(&cam);
 	pipeline.setScreenBuffer(win32WindowBuffer.bytebuffer);
 
-	/*
-	Mesh mesh;
-	
-	//top left triangle
-	mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-	mesh.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, 0.0f, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
-	mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-	
-	//bottom right triangle
-	mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.0f, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
-	mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-	mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-
-	Mesh mesh2;
-
-	//top left triangle
-	mesh2.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-	mesh2.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, 0.0f, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
-	mesh2.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-
-	//bottom right triangle
-	mesh2.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.0f, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
-	mesh2.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-	mesh2.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.0f, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-
-	//bottom right triangle
-	//mesh.verticies.push_back(Vertex(Vector4D(0.1, 0.0f, 0.0f, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
-	//mesh.verticies.push_back(Vertex(Vector4D(0.0f, -1.0f, 0.0f, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-	//mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.0f, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-	
-	for (float i = 0; i < 1000; i++) {
-		//top left triangle
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, i, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, i, 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, i, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-
-		//bottom right triangle
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, i, 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, i, 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, i, 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-	}
-	
-	for (float i = 0; i < 5; i++) {
-		//top left triangle
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.1f + (i / 10), 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, 1.0f, 0.1f + (i / 10), 1.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.1f + (i / 10), 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-
-		//bottom right triangle
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, -1.0f, 0.1f + (i / 10), 1.0f), Vector4D(1.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom right
-		mesh.verticies.push_back(Vertex(Vector4D(-1.0f, -1.0f, 0.1f + (i / 10), 1.0f), Vector4D(0.0f, 1.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//bottom left
-		mesh.verticies.push_back(Vertex(Vector4D(1.0f, 1.0f, 0.1f + (i / 10), 1.0f), Vector4D(1.0f, 0.0f, 0.0f, 0.0f), Vector4D(0.0f, 0.0f, 0.0f, 0.0f)));//upper right
-	}
-	
-
-	mesh.texture = new ImageBMP;
-	mesh.texture->loadBMP("smiley");
-
-	mesh2.texture = new ImageBMP;
-	mesh2.texture->loadBMP("wallpaper");
-	*/
+	//*******************************************Set directional light
+	pipeline.directionalLight = Vector4D(1.0f, 0.0f, 0.0f, 0.0f); //light shining down and to the right
 
 	Mesh mesh;
 	Mesh mesh2;
 	Mesh mesh3;
 	Mesh mesh4;
 	Mesh mesh5;
+	Mesh mesh6;
 	Mesh triangleMesh;
 
+	mesh.zCull = false;
 	mesh.loadTexture("Textures/moskvitch");
 	mesh.loadModel("Models/moskvitch");
 
 	mesh2.loadTexture("Textures/Conditioner");
 	mesh2.loadModel("Models/Conditioner");
 
+	mesh3.zCull = false;
 	mesh3.loadTexture("Textures/Tavern");
 	mesh3.loadModel("Models/Tavern");
 
@@ -173,18 +139,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	mesh5.loadTexture("Textures/ZombiDog");
 	mesh5.loadModel("Models/ZombiDog");
 
-	triangleMesh.loadTexture("smiley");
+	mesh6.zCull = false;
+	mesh6.loadTexture("Textures/farmhouse");
+	mesh6.loadModel("Models/farmhouse");
+
+	triangleMesh.loadTexture("grid");
 	triangleMesh.loadModel("Models/triangle");
-
-//	mesh.texture->saveBMP();
-
-	//***********************************************************Old StarField3D code
-	/*
-	//Vertex stars[100000];
-	vector<Vertex> stars(10000);
-	for (int i = 0; i < 10000; i++)
-		stars[i] = Vertex(static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, 0, 1);
-	*/
 
 	while (msg.message != WM_QUIT)
 	{
@@ -194,104 +154,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 			DispatchMessage(&msg);
 		}
 
-		//********************************************************multithreading draw buffer attempt
-		/*
-		thread funcTest(&Win32WindowBuffer::FillBufferColor, &win32WindowBuffer, 0, 0, 0);
-		funcTest.join();
-
-		thread funcTest2(&Win32WindowBuffer::FillBufferColor, &win32WindowBuffer, 100, 100, 0);
-		funcTest2.join();
-
-		thread funcTest3(&Win32WindowBuffer::FillBufferColor, &win32WindowBuffer, 255, 0, 0);
-		funcTest3.join();
-
-		thread funcTest4(&Win32WindowBuffer::FillBufferColor, &win32WindowBuffer, 0, 255, 0);
-		funcTest4.join();
-
-
-		//win32WindowBuffer.FillBufferColor(255, 0, 255);
-
-		for (int y = 0; y < win32WindowBuffer.clientHeight; y++) {
-		for (int x = 0; x < win32WindowBuffer.clientWidth; x++) {
-		char *pixelComponent = win32WindowBuffer.bytebuffer + ((y * win32WindowBuffer.clientWidth + x) * 4);
-		*(pixelComponent) = (unsigned char)255;
-		*(pixelComponent + 1) = (unsigned char)255;
-		*(pixelComponent + 2) = (unsigned char)255;
-		*(pixelComponent + 3) = (unsigned char)0;
-		}
-		}
-
-
-		//400
-		//100
-		//50
-		//37
-		//28
-		//23
-
-		//win32WindowBuffer.FillBufferColor(0, 255, 255);
-		//win32WindowBuffer.FillBufferColor(0, 255, 255);
-		//win32WindowBuffer.FillBufferColor(0, 255, 255);
-		//win32WindowBuffer.FillBufferColor(0, 255, 255);
-		//win32WindowBuffer.FillBufferColor(0, 255, 255);
-		//win32WindowBuffer.FillBufferColor(0, 255, 255);
-		*/
-
-		//********************************************************Old StarField3D code
-		/*
-		//update stars
-		//double delta = hpc.mtimePerFrame;
-
-		//for (int i = 0; i < 10000; i++) {
-		//	stars[i].v.z -= delta * 10;
-		//}
-
-		//reset any stars that go out of screen (into negative z)
-		for (int j = 0; j < 1; j++) {
-			for (int i = 0; i < 10000; i++) {
-				if (stars[i].v.z <= 0) {
-					//stars[i] = Vertex(static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 10.0)) - 5.0, 0, 1);
-				}
-			}
-		}
-		*/
-
-		//***********************************************************Old starfield code
-		/*
-		static double rot;
-		rot += delta * 100;
-
-		//Matrix4x4 modelRotate;
-		//modelRotate.setYrot(rot);
-		//modelRotate.setRotArb(-1, 0, 0, rot);
-		//Matrix4x4 modelTranslate;
-		//modelTranslate.setTranslate(0, -200, 300);
-		Matrix4x4 model;// = modelRotate * modelTranslate;
-
-		Matrix4x4 viewProjection = model * cam.viewMatrix.inverse() * cam.projectionMatrix;
-
-		//project verticies, divide by z (w), transform from NDC to screen space, finally draw 
-		for (int i = 0; i < 10000; i++) {
-			Vertex v = (stars[i].v * viewProjection);
-			v.v /= v.v.w;
-
-			if (v.v.x <= -1.0 || v.v.x >= 1.0 || v.v.y <= -1.0 || v.v.y >= 1.0 || v.v.z <= 0 || v.v.z >= 1)
-				continue;
-
-			int screenX = (int)((v.v.x + 1) * 0.5 * win32WindowBuffer.clientWidth);
-			int screenY = (int)((v.v.y + 1) * 0.5 * win32WindowBuffer.clientHeight);
-
-			char *pixelComponent = win32WindowBuffer.bytebuffer + ((screenY * win32WindowBuffer.clientWidth + screenX) * 4);
-			*(pixelComponent) = (unsigned char)255;
-			*(pixelComponent + 1) = (unsigned char)255;
-			*(pixelComponent + 2) = (unsigned char)255;
-			*(pixelComponent + 3) = (unsigned char)0;
-		}
-		*/
+		//*********************************************************Clear back/depth buffer for drawing
+		win32WindowBuffer.FillBufferBlack();
+		pipeline.clearDepthBuffer();
 
 		//*********************************************************Get delta (time spent rendering a single frame in miliseconds)
 		float delta = (float)hpc.mtimePerFrame;
 		
+		//*********************************************************Get Mouse Input and move Camera
+		cam.getInput(delta); //delta used to smooth mouse relative to how fast framerate is
+		cam.calculateViewMatrix(); //after rotating lookDirection vector, recalculate camera matrix
+
+
+		//**********************************************************Setup mesh matricies
 		static float rot = 0;
 		rot += delta;
 
@@ -306,7 +181,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		rotate.setIdentity();
 		rotate.setYrot(0);
 		scale.setIdentity();
-		scale.setScale(0.005, 0.005, 0.005);
+		scale.setScale(0.005f, 0.005f, 0.005f);
 		translate.setIdentity();
 		translate.setTranslate(0, 0, 0.5);
 		mesh2.modelMesh = rotate * scale * translate;
@@ -322,7 +197,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		rotate.setIdentity();
 		rotate.setYrot(rot);
 		scale.setIdentity();
-		scale.setScale(0.01, 0.01, 0.01);
+		scale.setScale(0.01f, 0.01f, 0.01f);
 		translate.setIdentity();
 		translate.setTranslate(3, 0, 2);
 		mesh4.modelMesh = rotate * scale * translate;
@@ -343,51 +218,51 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		translate.setTranslate(0, 0, 1);
 		triangleMesh.modelMesh = rotate * scale * translate;
 
-		win32WindowBuffer.FillBufferBlack();
-		//win32WindowBuffer.FillBufferColor(255, 255, 255);
-		pipeline.clearDepthBuffer();
-
-		//*********************************************************Get Mouse Input and move Camera
-		cam.getInput(delta); //delta used to smooth mouse relative to how fast framerate is
-		cam.calculateViewMatrix(); //after rotating lookDirection vector, recalculate camera matrix
-
-		//**********************************************************Render mesh objects
-
-		//pipeline.transform(&mesh);
+		rotate.setIdentity();
 		rotate.setYrot(rot);
-		scale.setScale(1, 1, 1);
-		translate.setTranslate(0, 0, 6);
-		mesh.modelMesh = rotate * scale * translate;
-		//pipeline.transform(&mesh);
+		scale.setIdentity();
+		scale.setScale(0.2f, 0.2f, 0.2f);
+		translate.setIdentity();
+		translate.setTranslate(0, 0, 15);
+		mesh6.modelMesh = rotate * scale * translate;
+		//**********************************************************Render mesh objects
+		
+		pipeline.transform(&mesh);
+		int x = 0;
+		for (int i = 0; i < 20; i++) {
+			rotate.setYrot(rot);
+			scale.setScale(1, 1, 1);
+			translate.setTranslate((float)x, 0, 6);
+			mesh.modelMesh = rotate * scale * translate;
+			pipeline.transform(&mesh);
 
-		//pipeline.transform(&mesh2);
-		//pipeline.transform(&mesh3);
-		//pipeline.transform(&mesh4);
-		//pipeline.transform(&mesh5);
+			//thread t(&Pipeline::transform, &pipeline, &mesh);
+			//t.join();
 
+			x += 4;
+		}
+		
+		
+		pipeline.transform(&mesh2);
+		pipeline.transform(&mesh3);
+		pipeline.transform(&mesh4);
+		pipeline.transform(&mesh5);
+		pipeline.transform(&mesh6);
 		pipeline.transform(&triangleMesh);
+		
 
-		//pipeline.transform verticies
-			//perform z-culling first
-			//project, (don't divide by w)
-		//pipeline.clip verticies
-			//check if entire triangle lies outside viewing frustum
-			//clip in homogenous clip space
-		//pipeline. shade triangle (model, lights)
-			//sort verticies
-			//generate vertex, 1/z depth, z depth, lighting, and texture gradients
-			//step down (y axis) scan line, draw from left to right
-			//interpolate the textures, 1/z depth, z depth, and lighting
+		//thread t(&Pipeline::transform, &pipeline, &triangleMesh);
+		//t.join();
 
-
-
-
-
+		//***********************************************************Flip buffer
 		win32WindowBuffer.drawBuffer();
 
+		//***********************************************************Render debug text
+		displayText(&win32WindowBuffer.hdc, L"Triangles Loaded: ", trianglesLoaded, 0, 0);
+		displayText(&win32WindowBuffer.hdc, L"Triangles Rendered: ", pipeline.trianglesRendered, 0, 20);
+		pipeline.trianglesRendered = 0;
+
 		hpc.Tick();
-		//if (hpc.mtimePerFrame > 0.033)
-			//Sleep(1000.0 * (hpc.mtimePerFrame - 0.033));
 		displayFPS(hpc, *win32WindowBuffer.getWindowHandle());
 		
 	}

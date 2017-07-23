@@ -191,6 +191,9 @@ void Vector4D::normalize()
 {
 	float mag = this->magnitude();
 
+	if (mag < 0.0001)
+		return;
+
 	this->x /= mag;
 	this->y /= mag;
 	this->z /= mag;

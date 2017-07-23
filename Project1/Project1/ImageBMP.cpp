@@ -176,15 +176,30 @@ void ImageBMP::loadBMP(string inFileName) {
 		if ((width * 3) % 4 != 0) {
 			pad = 4 - ((width * 3) % 4); //remaining bytes to be added
 		}
-
+		/*
+		UINT tileW = 128;
+		UINT tileH = 128;
+		UINT widthInTiles = (width + tileW - 1) / tileW;
+		*/
 		//read Color_RGB data and put into buffer
 		for (int h = height - 1; h >= 0; h--) {
 			for (unsigned int w = 0; w < width; w++) {
 				unsigned char b = fgetc(file);
 				unsigned char g = fgetc(file);
 				unsigned char r = fgetc(file);
+				/*
+				UINT tileX = w / tileW;
+				UINT tileY = h / tileH;
+				UINT inTileX = w % tileW;
+				UINT inTileY = h % tileH;
 
+				int val = 0;
+				val = val | ((unsigned int)b);
+				val = val | ((unsigned int)g << 8);
+				val = val | ((unsigned int)r << 16);
+				intbuffer[(tileY * widthInTiles + tileX) * (tileW * tileH) + inTileY * tileW + inTileX] = val;
 				//set intbuffer with BGRA (blue green red alpha)
+				*/
 				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)b);
 				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)g << 8);
 				intbuffer[w + width * h] = intbuffer[w + width * h] | ((unsigned int)r << 16);
