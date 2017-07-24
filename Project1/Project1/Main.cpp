@@ -70,6 +70,14 @@ int main() {
 	return WinMain(GetModuleHandle(NULL), NULL, NULL, SW_SHOW);
 }
 
+void setScaleTranslate(Mesh &mesh, float tx, float ty, float tz, float sx, float sy, float sz) {
+	Matrix4x4 scale;
+	scale.setScale(sx, sy, sz);
+	Matrix4x4 translate;
+	translate.setTranslate(tx, ty, tz);
+	mesh.modelMesh = scale * translate;
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
 	Win32WindowBuffer win32WindowBuffer(1920, 1080);
@@ -88,9 +96,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(-20, 0, -20);
+	cam.setOriginPosition(0, 0, -10);
 	//cam.setLookDirection(0.01, 0.7505, 1);
-	cam.setLookDirection(1, 0, 1);
+	cam.setLookDirection(0, 0, 1);
 	cam.calculateViewMatrix();
 
 	//define projection matrix
@@ -113,38 +121,92 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	//*******************************************Set directional light
 	pipeline.directionalLight = Vector4D(1.0f, 0.0f, 0.0f, 0.0f); //light shining down and to the right
+	/*
+	Mesh moskvitch;
+	moskvitch.zCull = false;
+	moskvitch.loadTexture("Textures/moskvitch");
+	moskvitch.loadModel("Models/moskvitch");
 
-	Mesh mesh;
-	Mesh mesh2;
-	Mesh mesh3;
-	Mesh mesh4;
-	Mesh mesh5;
-	Mesh mesh6;
-	Mesh triangleMesh;
+	Mesh Conditioner;
+	Conditioner.loadTexture("Textures/Conditioner");
+	Conditioner.loadModel("Models/Conditioner");
 
-	mesh.zCull = false;
-	mesh.loadTexture("Textures/moskvitch");
-	mesh.loadModel("Models/moskvitch");
+	Mesh Tavern;
+	Tavern.zCull = false;
+	Tavern.loadTexture("Textures/Tavern");
+	Tavern.loadModel("Models/Tavern");
 
-	mesh2.loadTexture("Textures/Conditioner");
-	mesh2.loadModel("Models/Conditioner");
+	Mesh Raptor;
+	Raptor.loadTexture("Textures/Raptor");
+	Raptor.loadModel("Models/Raptor");
 
-	mesh3.zCull = false;
-	mesh3.loadTexture("Textures/Tavern");
-	mesh3.loadModel("Models/Tavern");
+	Mesh ZombiDog;
+	ZombiDog.loadTexture("Textures/ZombiDog");
+	ZombiDog.loadModel("Models/ZombiDog");
 
-	mesh4.loadTexture("Textures/Raptor");
-	mesh4.loadModel("Models/Raptor");
+	Mesh farmhouse;
+	farmhouse.zCull = false;
+	farmhouse.loadTexture("Textures/farmhouse");
+	farmhouse.loadModel("Models/farmhouse");
 
-	mesh5.loadTexture("Textures/ZombiDog");
-	mesh5.loadModel("Models/ZombiDog");
+	Mesh Fountain;
+	Fountain.loadTexture("Textures/Fountain");
+	Fountain.loadModel("Models/Fountain");
 
-	mesh6.zCull = false;
-	mesh6.loadTexture("Textures/farmhouse");
-	mesh6.loadModel("Models/farmhouse");
+	Mesh barrel;
+	barrel.loadTexture("Textures/barrel");
+	barrel.loadModel("Models/barrel");
 
-	triangleMesh.loadTexture("grid");
-	triangleMesh.loadModel("Models/triangle");
+	Mesh skybox;
+	skybox.zCull = false;
+	skybox.loadTexture("Textures/skybox");
+	skybox.loadModel("Models/skybox");
+
+	Mesh chair;
+	chair.loadTexture("Textures/chair");
+	chair.loadModel("Models/chair");
+
+	Mesh bench;
+	bench.loadTexture("Textures/bench");
+	bench.loadModel("Models/bench");
+	
+	Mesh terrain;
+	terrain.zCull = false;
+	terrain.loadTexture("Textures/terrain");
+	terrain.loadModel("Models/terrain");
+
+	Mesh bridge;
+	bridge.zCull = false;
+	bridge.loadTexture("Textures/Bridge");
+	bridge.loadModel("Models/Bridge");
+	*/
+	Mesh canyon;
+	//canyon.zCull = false;
+	canyon.loadTexture("Textures/canyon");
+	canyon.loadModel("Models/canyon");
+
+	Mesh triangle;
+	triangle.loadTexture("Fountain");
+	triangle.loadModel("Models/triangle");
+
+	/*
+	setScaleTranslate(moskvitch, 0, 0, 0, 1, 1, 1);
+	setScaleTranslate(Conditioner, 3, 1, 0, 0.005f, 0.005f, 0.005f);
+	setScaleTranslate(Tavern, 10, 0, 0, 1, 1, 1);
+	setScaleTranslate(Raptor, 17, 0, 0, 0.01f, 0.01f, 0.01f);
+	setScaleTranslate(ZombiDog, 20, 0, 0, 1, 1, 1);
+	setScaleTranslate(farmhouse, 30, 0, 0, 0.4f, 0.4f, 0.4f);
+	setScaleTranslate(Fountain, 39, 0, 0, 0.01f, 0.01f, 0.01f);
+	setScaleTranslate(barrel, -3, 0, 0, 0.01f, 0.01f, 0.01f);
+	setScaleTranslate(skybox, 0, 150, 0, 0.05f, 0.05f, 0.05f);
+	setScaleTranslate(chair, -10, 0, 0, 1, 1, 1);
+	setScaleTranslate(bench, -13, 0, 0, 0.1f, 0.1f, 0.1f);
+	setScaleTranslate(terrain, 0, 0, 0, 0.00001f, 0.00001f, 0.00001f);
+	setScaleTranslate(bridge, -10, 0, -10, 0.2f, 0.2f, 0.2f);
+	*/
+	setScaleTranslate(canyon, 50, 0, 30, 1, 1, 1);
+
+	//setScaleTranslate(triangle, 0, 0, 0, 1, 1, 1);
 
 	while (msg.message != WM_QUIT)
 	{
@@ -164,95 +226,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		//*********************************************************Get Mouse Input and move Camera
 		cam.getInput(delta); //delta used to smooth mouse relative to how fast framerate is
 		cam.calculateViewMatrix(); //after rotating lookDirection vector, recalculate camera matrix
-
+		//cam.viewMatrix.m[3][1] = 2;
 
 		//**********************************************************Setup mesh matricies
 		static float rot = 0;
 		rot += delta;
 
-		Matrix4x4 rotate;
-		rotate.setYrot(rot);
-		Matrix4x4 scale;
-		scale.setScale(1, 1, 1);
-		Matrix4x4 translate;
-		translate.setTranslate(0, 0, 2);
-		mesh.modelMesh = rotate * scale * translate;
-
-		rotate.setIdentity();
-		rotate.setYrot(0);
-		scale.setIdentity();
-		scale.setScale(0.005f, 0.005f, 0.005f);
-		translate.setIdentity();
-		translate.setTranslate(0, 0, 0.5);
-		mesh2.modelMesh = rotate * scale * translate;
-
-		rotate.setIdentity();
-		rotate.setYrot(rot);
-		scale.setIdentity();
-		scale.setScale(1, 1, 1);
-		translate.setIdentity();
-		translate.setTranslate(-10, 0, 0);
-		mesh3.modelMesh = rotate * scale * translate;
-
-		rotate.setIdentity();
-		rotate.setYrot(rot);
-		scale.setIdentity();
-		scale.setScale(0.01f, 0.01f, 0.01f);
-		translate.setIdentity();
-		translate.setTranslate(3, 0, 2);
-		mesh4.modelMesh = rotate * scale * translate;
-
-		rotate.setIdentity();
-		rotate.setYrot(rot);
-		scale.setIdentity();
-		scale.setScale(1, 1, 1);
-		translate.setIdentity();
-		translate.setTranslate(3, 0, 0);
-		mesh5.modelMesh = rotate * scale * translate;
-
-		rotate.setIdentity();
-		rotate.setYrot(0);
-		scale.setIdentity();
-		scale.setScale(1, 1, 1);
-		translate.setIdentity();
-		translate.setTranslate(0, 0, 1);
-		triangleMesh.modelMesh = rotate * scale * translate;
-
-		rotate.setIdentity();
-		rotate.setYrot(rot);
-		scale.setIdentity();
-		scale.setScale(0.2f, 0.2f, 0.2f);
-		translate.setIdentity();
-		translate.setTranslate(0, 0, 15);
-		mesh6.modelMesh = rotate * scale * translate;
 		//**********************************************************Render mesh objects
-		
-		pipeline.transform(&mesh);
-		int x = 0;
-		for (int i = 0; i < 20; i++) {
-			rotate.setYrot(rot);
-			scale.setScale(1, 1, 1);
-			translate.setTranslate((float)x, 0, 6);
-			mesh.modelMesh = rotate * scale * translate;
-			pipeline.transform(&mesh);
+		/*
+		pipeline.transform(&moskvitch);
+		pipeline.transform(&Conditioner);
+		pipeline.transform(&Tavern);
+		pipeline.transform(&Raptor);
+		pipeline.transform(&ZombiDog);
+		pipeline.transform(&farmhouse);
+		pipeline.transform(&Fountain);
+		pipeline.transform(&barrel);
+		pipeline.transform(&skybox);
+		pipeline.transform(&chair);
+		pipeline.transform(&bench);
+		pipeline.transform(&bridge);
+		pipeline.transform(&terrain);
+		*/
+		pipeline.transform(&canyon);
 
-			//thread t(&Pipeline::transform, &pipeline, &mesh);
-			//t.join();
-
-			x += 4;
-		}
-		
-		
-		pipeline.transform(&mesh2);
-		pipeline.transform(&mesh3);
-		pipeline.transform(&mesh4);
-		pipeline.transform(&mesh5);
-		pipeline.transform(&mesh6);
-		pipeline.transform(&triangleMesh);
-		
-
-		//thread t(&Pipeline::transform, &pipeline, &triangleMesh);
-		//t.join();
+		//pipeline.transform(&triangle);
 
 		//***********************************************************Flip buffer
 		win32WindowBuffer.drawBuffer();

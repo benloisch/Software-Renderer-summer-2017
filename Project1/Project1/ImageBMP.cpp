@@ -6,45 +6,46 @@ ImageBMP::ImageBMP() {
 	width = 0;
 	height = 0;
 	fileName = "none";
-	red = NULL;
-	green = NULL;
-	blue = NULL;
+	intbuffer = NULL;
+	//red = NULL;
+	//green = NULL;
+	//blue = NULL;
 }
 
 ImageBMP::~ImageBMP() {
 	for (unsigned int i = 0; i < width; i++) {
-		if (red != NULL) 
-			delete[] red[i];
+		//if (red != NULL) 
+		//	delete[] red[i];
 		
-		if (green != NULL)
-				delete[] green[i];
+		//if (green != NULL)
+		//		delete[] green[i];
 
-		if (blue != NULL)
-			delete[] blue[i];
+		//if (blue != NULL)
+		//	delete[] blue[i];
 	}
 
-	delete[] red;
-	delete[] green;
-	delete[] blue;
+	//delete[] red;
+	//delete[] green;
+	//delete[] blue;
 }
 
 void ImageBMP::cleanup() {
 	for (unsigned int i = 0; i < width; i++) {
-		if (red != NULL)
-			delete[] red[i];
+		//if (red != NULL)
+		//	delete[] red[i];
 
-		if (green != NULL)
-			delete[] green[i];
+		//if (green != NULL)
+		//	delete[] green[i];
 
-		if (blue != NULL)
-			delete[] blue[i];
+		//if (blue != NULL)
+		//	delete[] blue[i];
 	}
 
 	delete[] intbuffer;
 
-	delete[] red;
-	delete[] green;
-	delete[] blue;
+	//delete[] red;
+	//delete[] green;
+	//delete[] blue;
 }
 
 void ImageBMP::createBMP(unsigned int width, unsigned int height, string fileName) {
@@ -52,9 +53,9 @@ void ImageBMP::createBMP(unsigned int width, unsigned int height, string fileNam
 	this->height = height;
 	this->fileName = fileName;
 
-	red = NULL;
-	green = NULL;
-	blue = NULL;
+	//red = NULL;
+	//green = NULL;
+	//blue = NULL;
 	try  {
 		//allocate same space as red, green, and blue chars except also have an alpha value
 		intbuffer = new unsigned int[width * height];
@@ -271,14 +272,14 @@ void ImageBMP::saveBMP() {
 		try {
 			for (int j = height - 1; j >= 0; j--) {
 				for (unsigned int i = 0; i < width; i++) {
-					file << blue[i][j];
-					file << green[i][j];
-					file << red[i][j];
+					//file << blue[i][j];
+					//file << green[i][j];
+					//file << red[i][j];
 				}
 
 				//add padding bytes
 				for (int i = 0; i < pad; i++) {
-					file << (char)0;
+					//file << (char)0;
 				}
 
 			}

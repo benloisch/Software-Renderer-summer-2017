@@ -171,7 +171,7 @@ inline void Camera::getInput(float &delta)
 		}
 	}
 	sMouse = mouseNow;
-	SetCursorPos((int)(width / 2), (int)(height / 2));
+	//SetCursorPos((int)(width / 2), (int)(height / 2));
 	GetCursorPos(&sMouse);
 }
 

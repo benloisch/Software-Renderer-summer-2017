@@ -17,9 +17,9 @@ private:
 
 public:
 
-	unsigned char **red;
-	unsigned char **green;
-	unsigned char **blue;
+	//unsigned char **red;
+	//unsigned char **green;
+	//unsigned char **blue;
 
 	unsigned int *intbuffer;
 
@@ -38,18 +38,18 @@ public:
 
 	inline 
 	void ImageBMP::setPixelColor(unsigned int x, unsigned int y, unsigned char r, unsigned char g, unsigned char b) {
-		red[x][y] = r;
-		green[x][y] = g;
-		blue[x][y] = b;
+		//red[x][y] = r;
+		//green[x][y] = g;
+		//blue[x][y] = b;
 	}
 	inline 
 	Color_RGB ImageBMP::getPixelColor(int x, int y) {
 		Color_RGB rgb;
 
 		try {
-			rgb.r = red[x][y];
-			rgb.g = green[x][y];
-			rgb.b = blue[x][y];
+			//rgb.r = red[x][y];
+			//rgb.g = green[x][y];
+			//rgb.b = blue[x][y];
 		}
 		catch (...) {
 			throw exception("Error in ImageBMP.getPixelColor()");

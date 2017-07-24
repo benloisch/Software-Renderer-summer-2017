@@ -25,7 +25,7 @@ public:
 
 	Vertex verticies[14];
 
-	Mesh *mesh;
+	Mesh mesh;
 
 	Pipeline();
 	void setScreenBuffer(char *inputBuffer);
@@ -77,6 +77,10 @@ public:
 	float texCoordXNextLineRight;
 	float texCoordStartYRight;
 	float texCoordYNextLineRight;
+
+	int textureWidth;
+	int textureWidthMinusOne;
+	int textureHeightMinusOne;
 private:
 
 
@@ -376,9 +380,6 @@ inline int Pipeline::clipVerticies() {
 }
 
 inline void Pipeline::scanline(int ystart, int yend) {
-	int textureWidth = mesh->texture->width;
-	int textureWidthMinusOne = mesh->texture->width-1;
-	int textureHeightMinusOne = mesh->texture->height - 1;
 	/*
 	UINT tileW = 128;
 	UINT tileH = 128;
@@ -391,10 +392,10 @@ inline void Pipeline::scanline(int ystart, int yend) {
 		float XXStep = (texCoordStartXRight - texCoordStartXLeft) / xdist;
 		float YXStep = (texCoordStartYRight - texCoordStartYLeft) / xdist;
 		float ZXStep = (inverseZStartRight - inverseZStartLeft) / xdist;
-		float lghtXStep = (lightStartRight - lightStartLeft) / xdist;
+		//float lghtXStep = (lightStartRight - lightStartLeft) / xdist;
 		//float ZXDepthStep = (depthZStartRight - depthZStartLeft) / xdist;
 
-		float lightValue = lightStartLeft + (lightXStep * xPreStep);
+		//float lightValue = lightStartLeft + (lightXStep * xPreStep);
 		float textureCoordX = texCoordStartXLeft + (XXStep * xPreStep);
 		float textureCoordY = texCoordStartYLeft + (YXStep * xPreStep);
 		float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
@@ -402,6 +403,9 @@ inline void Pipeline::scanline(int ystart, int yend) {
 		float *pdepth = depthBuffer + (y * cam->width + (int)(leftX));
 		unsigned int* ibuffer = (unsigned int*)(buffer + ((y * cam->width + (int)(leftX)) * 4));
 		for (int x = (int)(leftX); x < (int)(rightX); x++) {
+
+			//if (pressed#2)
+			//	x += ((int)rightX - (int)leftX);
 
 			if (inverseZ > *pdepth) {
 				float test = textureCoordX / inverseZ;
@@ -432,7 +436,8 @@ inline void Pipeline::scanline(int ystart, int yend) {
 				*/
 				//*ibuffer = mesh->texture->intbuffer[(tileY * widthInTiles + tileX) * (tileW * tileH) + inTileY * tileW + inTileX];
 				//*ibuffer = mesh->texture->intbuffer[test4 * textureWidth];
-				//*ibuffer = mesh->texture->intbuffer[test3];
+				*ibuffer = mesh.texture.intbuffer[test3];
+				/*
 				int RGB = mesh->texture->intbuffer[test3];
 				unsigned char b = ((unsigned char*)(&RGB))[0] * lightValue;
 				unsigned char g = ((unsigned char*)(&RGB))[1] * lightValue;
@@ -444,13 +449,13 @@ inline void Pipeline::scanline(int ystart, int yend) {
 				RGB = RGB | ((unsigned int)r << 16);
 
 				*ibuffer = RGB;
-
+				*/
 				*pdepth = inverseZ;
 			}
 
 			ibuffer++;
 			pdepth++;
-			lightValue += lghtXStep;
+			//lightValue += lghtXStep;
 			textureCoordX += XXStep;
 			textureCoordY += YXStep;
 			inverseZ += ZXStep;
@@ -460,8 +465,8 @@ inline void Pipeline::scanline(int ystart, int yend) {
 		leftX -= lefthandslope;
 		rightX -= righthandslope;
 
-		lightStartLeft -= lightNextLineLeft;
-		lightStartRight -= lightNextLineRight;
+		//lightStartLeft -= lightNextLineLeft;
+		//lightStartRight -= lightNextLineRight;
 		texCoordStartXLeft -= texCoordXNextLineLeft;
 		texCoordStartYLeft -= texCoordYNextLineLeft;
 		texCoordStartXRight -= texCoordXNextLineRight;

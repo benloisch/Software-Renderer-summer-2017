@@ -3,8 +3,9 @@
 int trianglesLoaded = 0;
 
 void Mesh::loadTexture(string filename) {
-	texture = new ImageBMP;
-	texture->loadBMP(filename);
+	//texture = new ImageBMP;
+	//texture->loadBMP(filename);
+	texture.loadBMP(filename);
 }
 
 void Mesh::loadModel(string filename) {

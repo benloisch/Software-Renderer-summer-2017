@@ -36,7 +36,7 @@ public:
 
 	Matrix4x4 modelMesh;
 	vector<Vertex> verticies;
-	ImageBMP *texture;
+	ImageBMP texture;
 
 	void loadModel(string filename);
 	void loadTexture(string filename);
