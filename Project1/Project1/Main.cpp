@@ -121,7 +121,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	//*******************************************Set directional light
 	pipeline.directionalLight = Vector4D(1.0f, 0.0f, 0.0f, 0.0f); //light shining down and to the right
-	/*
+	
 	Mesh moskvitch;
 	moskvitch.zCull = false;
 	moskvitch.loadTexture("Textures/moskvitch");
@@ -179,7 +179,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	bridge.zCull = false;
 	bridge.loadTexture("Textures/Bridge");
 	bridge.loadModel("Models/Bridge");
-	*/
+	
 	Mesh canyon;
 	//canyon.zCull = false;
 	canyon.loadTexture("Textures/canyon");
@@ -189,7 +189,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	triangle.loadTexture("Fountain");
 	triangle.loadModel("Models/triangle");
 
-	/*
 	setScaleTranslate(moskvitch, 0, 0, 0, 1, 1, 1);
 	setScaleTranslate(Conditioner, 3, 1, 0, 0.005f, 0.005f, 0.005f);
 	setScaleTranslate(Tavern, 10, 0, 0, 1, 1, 1);
@@ -203,7 +202,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	setScaleTranslate(bench, -13, 0, 0, 0.1f, 0.1f, 0.1f);
 	setScaleTranslate(terrain, 0, 0, 0, 0.00001f, 0.00001f, 0.00001f);
 	setScaleTranslate(bridge, -10, 0, -10, 0.2f, 0.2f, 0.2f);
-	*/
 	setScaleTranslate(canyon, 50, 0, 30, 1, 1, 1);
 
 	//setScaleTranslate(triangle, 0, 0, 0, 1, 1, 1);
@@ -233,7 +231,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		rot += delta;
 
 		//**********************************************************Render mesh objects
-		/*
+		
 		pipeline.transform(&moskvitch);
 		pipeline.transform(&Conditioner);
 		pipeline.transform(&Tavern);
@@ -247,7 +245,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		pipeline.transform(&bench);
 		pipeline.transform(&bridge);
 		pipeline.transform(&terrain);
-		*/
 		pipeline.transform(&canyon);
 
 		//pipeline.transform(&triangle);
