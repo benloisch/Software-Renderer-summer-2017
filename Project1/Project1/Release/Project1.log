@@ -1,6 +1,0 @@
-﻿  Main.cpp
-  Pipeline.cpp
-LINK : warning LNK4031: no subsystem specified; CONSOLE assumed
-  Generating code
-  Finished generating code
-  Project1.vcxproj -> C:\Users\Ben Loisch\Documents\GitHub\Repository\Software-Renderer-summer-2017\Project1\Project1\Release\Project1.exe

@@ -1,0 +1,7 @@
+﻿  Main.cpp
+Main.cpp(305): warning C4305: 'argument' : truncation from 'double' to 'float'
+Main.cpp(321): warning C4305: 'argument' : truncation from 'double' to 'float'
+LINK : warning LNK4031: no subsystem specified; CONSOLE assumed
+  Generating code
+  Finished generating code
+  Project1.vcxproj -> C:\Users\mz7bf2\Downloads\Software-Renderer-summer-2017-master\Project1\Project1\Release\Project1.exe
