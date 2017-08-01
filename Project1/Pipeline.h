@@ -438,7 +438,7 @@ inline void Pipeline::scanline(int ystart, int yend) {
 		float inverseZ = inverseZStartLeft + (ZXStep * xPreStep);
 		//float depthZ = depthZStartLeft + (ZXDepthStep * xPreStep);
 		float *pdepth = depthBuffer + (y * cam->width + (int)(leftX));
-		unsigned int* ibuffer = (unsigned int*)(buffer + ((y * cam->width * 2 + (int)(leftX)) * 4 * 2));
+		unsigned int* ibuffer = (unsigned int*)(buffer + ((y * cam->width + (int)(leftX)) * 4));
 		for (int x = (int)(leftX); x < (int)(rightX); x++) {
 
 			//if (pressed#2)
@@ -458,9 +458,9 @@ inline void Pipeline::scanline(int ystart, int yend) {
 
 				int test3 = ((int)((test)*(textureWidthMinusOne)+0.5)) + textureWidth * ((int)((test2)*(textureHeightMinusOne)+0.5));
 				*ibuffer = mesh->texture.intbuffer[test3];
-				*(ibuffer + 1) = *ibuffer;
-				*(ibuffer + cam->width * 2) = *ibuffer;
-				*(ibuffer + cam->width * 2 + 1) = *ibuffer;
+				//*(ibuffer + 1) = *ibuffer;
+				//*(ibuffer + cam->width * 2) = *ibuffer;
+				//*(ibuffer + cam->width * 2 + 1) = *ibuffer;
 				//int origTexX = ((int)((test)*(textureWidthMinusOne)+0.5));
 				//int origTexY = ((int)((test2)*(textureHeightMinusOne)+0.5));
 				
@@ -518,7 +518,7 @@ inline void Pipeline::scanline(int ystart, int yend) {
 				*pdepth = inverseZ;
 			}
 
-			ibuffer+=2;
+			ibuffer++;
 			pdepth++;
 			//lightValue += lghtXStep;
 			textureCoordX += XXStep;

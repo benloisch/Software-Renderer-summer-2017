@@ -70,12 +70,14 @@ int main() {
 	return WinMain(GetModuleHandle(NULL), NULL, NULL, SW_SHOW);
 }
 
-void setScaleTranslate(Mesh &mesh, float tx, float ty, float tz, float sx, float sy, float sz) {
+void setScaleRotTranslate(Mesh &mesh, float ry, float tx, float ty, float tz, float sx, float sy, float sz) {
 	Matrix4x4 scale;
 	scale.setScale(sx, sy, sz);
 	Matrix4x4 translate;
 	translate.setTranslate(tx, ty, tz);
-	mesh.modelMesh = scale * translate;
+	Matrix4x4 rotation;
+	rotation.setYrot(ry);
+	mesh.modelMesh = rotation * scale * translate;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
@@ -96,15 +98,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(0, 0, 0);
+	cam.setOriginPosition(40, 15, -40);
 	//cam.setLookDirection(0.01, 0.7505, 1);
-	cam.setLookDirection(0, 0, 1);
+	cam.setLookDirection(-1, -1, 1);
 	cam.calculateViewMatrix();
 
 	//define projection matrix
 	cam.setNearPlane(0.1f);
 	cam.setFarPlane(1000);
-	cam.setAspectRatio(win32WindowBuffer.clientWidth / 2, win32WindowBuffer.clientHeight / 2);
+	cam.setAspectRatio(win32WindowBuffer.clientWidth, win32WindowBuffer.clientHeight);
 	cam.setFieldOfView(70);
 	cam.calculateProjectionMatrix();
 
@@ -120,94 +122,101 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	pipeline.setScreenBuffer(win32WindowBuffer.bytebuffer);
 
 	//*******************************************Set directional light
-	pipeline.directionalLight = Vector4D(1.0f, 0.0f, 0.0f, 0.0f); //light shining down and to the right
+	//pipeline.directionalLight = Vector4D(1.0f, 0.0f, 0.0f, 0.0f); //light shining down and to the right
 	
+	//*******************************************Load meshes
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 5, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
+	Mesh Raptor;
+	Raptor.loadTexture("Textures/Raptor");
+	Raptor.loadModel("Models/Raptor");
+
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 10, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
+	Mesh Conditioner;
+	Conditioner.loadTexture("Textures/Conditioner");
+	Conditioner.loadModel("Models/Conditioner");
+
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 12, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
+	Mesh ZombiDog;
+	ZombiDog.loadTexture("Textures/ZombiDog");
+	ZombiDog.loadModel("Models/ZombiDog");
+
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 25, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
 	Mesh moskvitch;
 	moskvitch.zCull = false;
 	moskvitch.loadTexture("Textures/moskvitch");
 	moskvitch.loadModel("Models/moskvitch");
 
-	Mesh Conditioner;
-	Conditioner.loadTexture("Textures/Conditioner");
-	Conditioner.loadModel("Models/Conditioner");
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 30, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
+	Mesh barrel;
+	barrel.loadTexture("Textures/barrel");
+	barrel.loadModel("Models/barrel");
 
-	Mesh Tavern;
-	Tavern.zCull = false;
-	Tavern.loadTexture("Textures/Tavern");
-	Tavern.loadModel("Models/Tavern");
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 35, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
+	Mesh chair;
+	chair.loadTexture("Textures/chair");
+	chair.loadModel("Models/chair");
 
-	Mesh Raptor;
-	Raptor.loadTexture("Textures/Raptor");
-	Raptor.loadModel("Models/Raptor");
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 40, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
+	Mesh bench;
+	bench.loadTexture("Textures/bench");
+	bench.loadModel("Models/bench");
 
-	Mesh ZombiDog;
-	ZombiDog.loadTexture("Textures/ZombiDog");
-	ZombiDog.loadModel("Models/ZombiDog");
-
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 50, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
 	Mesh farmhouse;
 	farmhouse.zCull = false;
 	farmhouse.loadTexture("Textures/farmhouse");
 	farmhouse.loadModel("Models/farmhouse");
 
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 55, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
 	Mesh Fountain;
 	Fountain.loadTexture("Textures/Fountain");
 	Fountain.loadModel("Models/Fountain");
 
-	Mesh barrel;
-	barrel.loadTexture("Textures/barrel");
-	barrel.loadModel("Models/barrel");
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 65, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
+	Mesh Tavern;
+	Tavern.zCull = false;
+	Tavern.loadTexture("Textures/Tavern");
+	Tavern.loadModel("Models/Tavern");
 
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 75, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
 	Mesh skybox;
 	skybox.zCull = false;
 	skybox.loadTexture("Textures/skybox");
 	skybox.loadModel("Models/skybox");
 
-	Mesh chair;
-	chair.loadTexture("Textures/chair");
-	chair.loadModel("Models/chair");
-
-	Mesh bench;
-	bench.loadTexture("Textures/bench");
-	bench.loadModel("Models/bench");
-	
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 90, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
 	Mesh terrain;
 	terrain.zCull = false;
 	terrain.loadTexture("Textures/terrain");
 	terrain.loadModel("Models/terrain");
 
+	displayText(&win32WindowBuffer.hdc, L"Loading: %", 95, win32WindowBuffer.width / 2, win32WindowBuffer.height / 2);
 	Mesh bridge;
 	bridge.zCull = false;
 	bridge.loadTexture("Textures/Bridge");
 	bridge.loadModel("Models/Bridge");
 	
 	Mesh canyon;
-	//canyon.zCull = false;
 	canyon.loadTexture("Textures/canyon");
 	canyon.loadModel("Models/canyon");
-
-
-	Mesh triangle;
-	triangle.loadTexture("Fountain");
-	triangle.loadModel("Models/triangle");
-
 	
-	setScaleTranslate(moskvitch, 0, 0, 0, 1, 1, 1);
-	setScaleTranslate(Conditioner, 3, 1, 0, 0.005f, 0.005f, 0.005f);
-	setScaleTranslate(Tavern, 10, 0, 0, 1, 1, 1);
-	setScaleTranslate(Raptor, 17, 0, 0, 0.01f, 0.01f, 0.01f);
-	setScaleTranslate(ZombiDog, 20, 0, 0, 1, 1, 1);
-	setScaleTranslate(farmhouse, 30, 0, 0, 0.4f, 0.4f, 0.4f);
-	setScaleTranslate(Fountain, 39, 0, 0, 0.01f, 0.01f, 0.01f);
-	setScaleTranslate(barrel, -3, 0, 0, 0.01f, 0.01f, 0.01f);
-	setScaleTranslate(skybox, 0, 150, 0, 0.05f, 0.05f, 0.05f);
-	setScaleTranslate(chair, -10, 0, 0, 1, 1, 1);
-	setScaleTranslate(bench, -13, 0, 0, 0.1f, 0.1f, 0.1f);
-	setScaleTranslate(terrain, 0, 0, 0, 0.00001f, 0.00001f, 0.00001f);
-	setScaleTranslate(bridge, -10, 0, -10, 0.2f, 0.2f, 0.2f);
-	setScaleTranslate(canyon, 50, 0, 30, 1, 1, 1);
+	//*******************************************************************Set initial position of meshes
+	setScaleRotTranslate(Raptor, -90, 40, 0, 85, 0.2f, 0.2f, 0.2f);
+	setScaleRotTranslate(Conditioner, -35, 18, 5, -26, 0.005f, 0.005f, 0.005f);
+	setScaleRotTranslate(ZombiDog, 30, 28, 0, -25, 1.2f, 1.2f, 1.2f);
+	setScaleRotTranslate(moskvitch, 0, 20, 0, -14, 2, 2, 2);
+	setScaleRotTranslate(barrel, 50, 33, 0, -14, 0.02f, 0.02f, 0.02f);
+	setScaleRotTranslate(chair, 50, 36.5, 1, -10.5, 1, 1, 1);
+	setScaleRotTranslate(bench, -45, 38, 0, -24, 0.1f, 0.1f, 0.1f);
+	setScaleRotTranslate(farmhouse, 50, 40, 0, -5, 0.4f, 0.4f, 0.4f);
+	setScaleRotTranslate(Fountain, 0, 35, 0, -20, 0.01f, 0.01f, 0.01f);
+	setScaleRotTranslate(Tavern, -35, 20, 0, -30, 1, 1, 1);
+	setScaleRotTranslate(skybox, 0, 0, 150, 0, 0.05f, 0.05f, 0.05f);
+	setScaleRotTranslate(terrain, 0, 0, 0, 0, 0.00001f, 0.00001f, 0.00001f);
+	setScaleRotTranslate(bridge, 0, 34, 0, 85, 0.9f, 0.9f, 0.9f);
 	
-	setScaleTranslate(triangle, 0, -0.5, 2, 1, 1, 1);
-
+	setScaleRotTranslate(canyon, 0, 40, 0, -15, 7, 7, 7);
+	
 	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -234,22 +243,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 		//**********************************************************Render mesh objects
 		
-		pipeline.transform(&moskvitch);
 		pipeline.transform(&Conditioner);
-		pipeline.transform(&Tavern);
+		setScaleRotTranslate(Raptor, -90, 40, 0, 85, 0.2f, 0.2f, 0.2f);
+		pipeline.transform(&Raptor);
+		setScaleRotTranslate(Raptor, -90, 35, 0, 75, 0.3f, 0.3f, 0.3f);
+		pipeline.transform(&Raptor);
+		setScaleRotTranslate(Raptor, -90, 42, 0, 70, 0.1f, 0.1f, 0.1f);
 		pipeline.transform(&Raptor);
 		pipeline.transform(&ZombiDog);
-		pipeline.transform(&farmhouse);
-		pipeline.transform(&Fountain);
+		pipeline.transform(&moskvitch);
+		setScaleRotTranslate(barrel, 50, 33, 0, -14, 0.02f, 0.02f, 0.02f);
 		pipeline.transform(&barrel);
-		pipeline.transform(&skybox);
+		setScaleRotTranslate(barrel, 50, 31, 0, -15, 0.02f, 0.02f, 0.02f);
+		pipeline.transform(&barrel);
 		pipeline.transform(&chair);
 		pipeline.transform(&bench);
+		pipeline.transform(&farmhouse);
+		pipeline.transform(&Fountain);
+		pipeline.transform(&Tavern);
 		pipeline.transform(&bridge);
-		pipeline.transform(&terrain);
 		pipeline.transform(&canyon);
-		
-		pipeline.transform(&triangle);
+		pipeline.transform(&terrain);
+		pipeline.transform(&skybox);
 
 		//***********************************************************Flip buffer
 		win32WindowBuffer.drawBuffer();
