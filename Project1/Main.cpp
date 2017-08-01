@@ -3,7 +3,7 @@
 #include <math.h>
 #include <iostream>
 #include <vector>
-
+#include <wtypes.h>
 #include <thread>
 
 using namespace std;
@@ -82,7 +82,11 @@ void setScaleRotTranslate(Mesh &mesh, float ry, float tx, float ty, float tz, fl
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1280, 800); //960 x 540
+	RECT desktop;
+	const HWND hDesktop = GetDesktopWindow();
+	GetWindowRect(hDesktop, &desktop);
+
+	Win32WindowBuffer win32WindowBuffer(desktop.right, desktop.bottom); //960 x 540
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 
