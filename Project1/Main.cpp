@@ -82,7 +82,7 @@ void setScaleRotTranslate(Mesh &mesh, float ry, float tx, float ty, float tz, fl
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-	Win32WindowBuffer win32WindowBuffer(1920, 1080); //960 x 540
+	Win32WindowBuffer win32WindowBuffer(1280, 800); //960 x 540
 	if (!win32WindowBuffer.initializeWindow(hInstance, nShowCmd))
 		return -1;
 

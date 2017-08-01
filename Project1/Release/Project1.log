@@ -1,7 +1,105 @@
-﻿  Main.cpp
-Main.cpp(305): warning C4305: 'argument' : truncation from 'double' to 'float'
-Main.cpp(321): warning C4305: 'argument' : truncation from 'double' to 'float'
+﻿  BufferInterface.cpp
+  Camera.cpp
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(318): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(319): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(320): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(321): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(329): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(330): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(331): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(332): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(340): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(341): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(342): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(343): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(380): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(381): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(382): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(383): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(384): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(385): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(386): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(387): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(388): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Vector4D.h(186): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  Color_RGB.cpp
+  High_Performance_Counter.cpp
+  ImageBMP.cpp
+  Main.cpp
+  Matrix4x4.cpp
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(318): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(319): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(320): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(321): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(329): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(330): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(331): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(332): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(340): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(341): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(342): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(343): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(380): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(381): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(382): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(383): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(384): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(385): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(386): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(387): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(388): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  Mesh.cpp
+  Pipeline.cpp
+  Vector4D.cpp
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(318): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(319): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(320): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(321): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(329): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(330): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(331): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(332): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(340): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(341): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(342): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(343): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(380): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(381): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(382): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(383): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(384): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(385): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(386): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(387): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(388): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Vector4D.h(186): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  Vertex.cpp
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(318): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(319): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(320): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(321): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(329): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(330): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(331): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(332): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(340): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(341): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(342): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(343): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(380): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(381): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(382): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(383): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(384): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(385): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(386): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(387): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Matrix4x4.h(388): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\github\software-renderer-summer-2017\project1\Vector4D.h(186): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  Win32WindowBuffer.cpp
 LINK : warning LNK4031: no subsystem specified; CONSOLE assumed
   Generating code
+  All 615 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
-  Project1.vcxproj -> C:\Users\mz7bf2\Downloads\Software-Renderer-summer-2017-master\Project1\Project1\Release\Project1.exe
+  Project1.vcxproj -> C:\Github\Software-Renderer-summer-2017\Project1\Release\Project1.exe
+  Project1.vcxproj -> C:\Github\Software-Renderer-summer-2017\Project1\Release\Project1.pdb (Full PDB)
