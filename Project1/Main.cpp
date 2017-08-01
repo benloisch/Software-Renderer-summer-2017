@@ -102,16 +102,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	//*******************************************Setup camera
 	//define camera position / rotation
 	Camera cam;
-	cam.setOriginPosition(40, 15, -40);
+	//cam.setOriginPosition(40, 15, -40);
+	cam.setOriginPosition(30, 3, -20);
 	//cam.setLookDirection(0.01, 0.7505, 1);
-	cam.setLookDirection(-1, -1, 1);
+	cam.setLookDirection(0, 0, 1);
 	cam.calculateViewMatrix();
 
 	//define projection matrix
 	cam.setNearPlane(0.1f);
 	cam.setFarPlane(1000);
 	cam.setAspectRatio(win32WindowBuffer.clientWidth, win32WindowBuffer.clientHeight);
-	cam.setFieldOfView(70);
+	cam.setFieldOfView(60);
 	cam.calculateProjectionMatrix();
 
 	//*******************************************Setup input
@@ -237,13 +238,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		float delta = (float)hpc.mtimePerFrame;
 		
 		//*********************************************************Get Mouse Input and move Camera
-		cam.getInput(delta); //delta used to smooth mouse relative to how fast framerate is
-		cam.calculateViewMatrix(); //after rotating lookDirection vector, recalculate camera matrix
-		//cam.viewMatrix.m[3][1] = 2;
 
-		//**********************************************************Setup mesh matricies
 		static float rot = 0;
 		rot += delta;
+		
+		cam.getInput(delta); //delta used to smooth mouse relative to how fast framerate is
+		Matrix4x4 rotation;
+		rotation.setYrot(rot * 0.05);
+		cam.lookDirection *= rotation;
+		cam.calculateViewMatrix(); //after rotating lookDirection vector, recalculate camera matrix
+		//cam.viewMatrix.m[3][1] = 2;
 
 		//**********************************************************Render mesh objects
 		
