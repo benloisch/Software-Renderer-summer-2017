@@ -243,9 +243,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		rot += delta;
 		
 		cam.getInput(delta); //delta used to smooth mouse relative to how fast framerate is
-		Matrix4x4 rotation;
-		rotation.setYrot(rot * 0.05);
-		cam.lookDirection *= rotation;
+		//Matrix4x4 rotation;
+		//rotation.setYrot(rot * 0.05);
+		//cam.lookDirection *= rotation;
 		cam.calculateViewMatrix(); //after rotating lookDirection vector, recalculate camera matrix
 		//cam.viewMatrix.m[3][1] = 2;
 
